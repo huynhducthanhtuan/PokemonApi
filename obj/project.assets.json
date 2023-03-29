@@ -3888,23 +3888,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Eden\\.nuget\\packages\\": {},
+    "C:\\Users\\tuanh\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Eden\\source\\repos\\PokemonApi\\PokemonApi.csproj",
+      "projectUniqueName": "C:\\Users\\tuanh\\Source\\Repos\\PokemonApi\\PokemonApi.csproj",
       "projectName": "PokemonApi",
-      "projectPath": "C:\\Users\\Eden\\source\\repos\\PokemonApi\\PokemonApi.csproj",
-      "packagesPath": "C:\\Users\\Eden\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Eden\\source\\repos\\PokemonApi\\obj\\",
+      "projectPath": "C:\\Users\\tuanh\\Source\\Repos\\PokemonApi\\PokemonApi.csproj",
+      "packagesPath": "C:\\Users\\tuanh\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\tuanh\\Source\\Repos\\PokemonApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Eden\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\tuanh\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

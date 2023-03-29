@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using PokemonApi;
 using PokemonApi.Data;
+using PokemonApi.Interfaces;
+using PokemonApi.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>();
+builder.Services.AddScoped<IPokemonRepository, PokemonRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
