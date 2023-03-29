@@ -17,5 +17,10 @@ namespace PokemonApi.Repository
         {
             return _context.Pokemons.OrderBy(p => p.Id).ToList();
         }
+
+        public Pokemon GetPokemon(int Id)
+        {
+            return _context.Pokemons.FirstOrDefault(p => p.Id == Id);
+        }
     }
 }
