@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "SfwABCQEzmvFssMJLsalPhVN/nfmFoHABR0qbkeK1UZebbncLB0Bu3nC4YKCfLuy5BoFEBbLpp+0tldYMC+ZBA==",
+  "dgSpecHash": "24udx+bqDmhCbPMF3wYcg791avnkj7Y1MMKY85QqOCG3qcrZe5HDZnz0cYsRw2m2kwhzPiCRS7oUOKYse0UntQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\Eden\\source\\repos\\PokemonApi\\PokemonApi.csproj",
   "expectedPackageFiles": [
@@ -45,6 +45,8 @@
     "C:\\Users\\Eden\\.nuget\\packages\\microsoft.win32.registry\\5.0.0\\microsoft.win32.registry.5.0.0.nupkg.sha512",
     "C:\\Users\\Eden\\.nuget\\packages\\microsoft.win32.systemevents\\5.0.0\\microsoft.win32.systemevents.5.0.0.nupkg.sha512",
     "C:\\Users\\Eden\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
+    "C:\\Users\\Eden\\.nuget\\packages\\mysqlconnector\\2.2.5\\mysqlconnector.2.2.5.nupkg.sha512",
+    "C:\\Users\\Eden\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\7.0.0\\pomelo.entityframeworkcore.mysql.7.0.0.nupkg.sha512",
     "C:\\Users\\Eden\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
     "C:\\Users\\Eden\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
     "C:\\Users\\Eden\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
