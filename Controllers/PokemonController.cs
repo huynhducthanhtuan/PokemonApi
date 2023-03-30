@@ -25,7 +25,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult GetPokemons()
         {
-            var pokemons = _mapper.Map<List<PokemonDto>>(_pokemonRepository.GetPokemons());
+            var pokemons = _mapper.Map<List<PokemonDto>>
+                (_pokemonRepository.GetPokemons());
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -43,7 +44,8 @@ namespace PokemonApi.Controllers
             if (!_pokemonRepository.PokemonExists(pokemonId))
                 return NotFound();
 
-            var pokemon = _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokemonId));
+            var pokemon = _mapper.Map<PokemonDto>
+                (_pokemonRepository.GetPokemon(pokemonId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -56,14 +58,15 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Pokemon))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetPokemon(string name)
+        public IActionResult GetPokemon(string pokemonName)
         {
-            string pokemonName = HttpContext.Request.Query["name"];
+            string _pokemonName = HttpContext.Request.Query["pokemonName"];
 
-            if (!_pokemonRepository.PokemonExists(pokemonName))
+            if (!_pokemonRepository.PokemonExists(_pokemonName))
                 return NotFound();
 
-            var pokemon = _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokemonName));
+            var pokemon = _mapper.Map<PokemonDto>
+                (_pokemonRepository.GetPokemon(_pokemonName));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -92,6 +95,7 @@ namespace PokemonApi.Controllers
         ///<summary>Test Pass 2 Params In 1</summary>
         [HttpGet("{pokemonId}&{pokemonName}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult GetPokemon([FromRoute] int pokemonId, [FromRoute] string pokemonName)
         {
             if (!ModelState.IsValid)

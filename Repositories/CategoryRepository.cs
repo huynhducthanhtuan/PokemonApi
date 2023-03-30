@@ -23,14 +23,19 @@ namespace PokemonApi.Repository
             return _context.Categories.ToList();
         }
 
-        public Category GetCategory(int id)
+        public Category GetCategory(int categoryId)
         {
-            return _context.Categories.Where(e => e.Id == id).FirstOrDefault();
+            return _context.Categories
+                .Where(e => e.Id == categoryId)
+                .FirstOrDefault();
         }
 
         public ICollection<Pokemon> GetPokemonByCategory(int categoryId)
         {
-            return _context.PokemonCategories.Where(e => e.CategoryId == categoryId).Select(c => c.Pokemon).ToList();
+            return _context.PokemonCategories
+                .Where(e => e.CategoryId == categoryId)
+                .Select(c => c.Pokemon)
+                .ToList();
         }
     }
 }

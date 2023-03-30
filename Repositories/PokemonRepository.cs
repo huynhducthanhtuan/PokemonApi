@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using PokemonApi.Data;
-using PokemonApi.Dto;
+﻿using PokemonApi.Data;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -10,7 +8,7 @@ namespace PokemonApi.Repository
     {
         private readonly DataContext _context;
 
-        public PokemonRepository(DataContext context, IMapper mapper)
+        public PokemonRepository(DataContext context)
         {
             _context = context;
         }
@@ -32,7 +30,9 @@ namespace PokemonApi.Repository
 
         public double GetPokemonRating(int pokemonId)
         {
-            var reviews = _context.Reviews.Where(r => r.Pokemon.Id == pokemonId).ToList();
+            var reviews = _context.Reviews
+                .Where(r => r.Pokemon.Id == pokemonId)
+                .ToList();
 
             if (reviews.Count() <= 0)
                 return 0;

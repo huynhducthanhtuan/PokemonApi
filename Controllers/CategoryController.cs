@@ -22,6 +22,7 @@ namespace PokemonApi.Controllers
         ///<summary>Get Category List</summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Category>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult GetCategories()
         {
             var categories = _mapper.Map<List<CategoryDto>>
@@ -37,6 +38,7 @@ namespace PokemonApi.Controllers
         [HttpGet("{categoryId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Category))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetCategory(int categoryId)
         {
             if (!_categoryRepository.CategoryExists(categoryId))

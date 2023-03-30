@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using PokemonApi.Data;
+﻿using PokemonApi.Data;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -24,19 +23,26 @@ namespace PokemonApi.Repository
             return _context.Countries.ToList();
         }
 
-        public Country GetCountry(int id)
+        public Country GetCountry(int countryId)
         {
-            return _context.Countries.Where(c => c.Id == id).FirstOrDefault();
+            return _context.Countries
+                .Where(c => c.Id == countryId)
+                .FirstOrDefault();
         }
 
         public Country GetCountryByOwner(int ownerId)
         {
-            return _context.Owners.Where(o => o.Id == ownerId).Select(c => c.Country).FirstOrDefault();
+            return _context.Owners
+                .Where(o => o.Id == ownerId)
+                .Select(c => c.Country)
+                .FirstOrDefault();
         }
 
         public ICollection<Owner> GetOwnersFromACountry(int countryId)
         {
-            return _context.Owners.Where(c => c.Country.Id == countryId).ToList();
+            return _context.Owners
+                .Where(c => c.Country.Id == countryId)
+                .ToList();
         }
     }
 }
