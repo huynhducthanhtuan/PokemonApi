@@ -8,6 +8,8 @@ namespace PokemonApi.Helper
     {
         public MappingProfiles()
         {
+            CreateMap<Category, CategoryDto>();
+            CreateMap<Country, CountryDto>();
             CreateMap<Pokemon, PokemonDto>();
         }
     }

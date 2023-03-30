@@ -34,16 +34,16 @@ namespace PokemonApi.Controllers
         }
 
         ///<summary>Get Pokemon By Id</summary>
-        [HttpGet("{id}")]
+        [HttpGet("{pokemonId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Pokemon))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetPokemon(int id)
+        public IActionResult GetPokemon(int pokemonId)
         {
-            if (!_pokemonRepository.PokemonExists(id))
+            if (!_pokemonRepository.PokemonExists(pokemonId))
                 return NotFound();
 
-            var pokemon = _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(id));
+            var pokemon = _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokemonId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
