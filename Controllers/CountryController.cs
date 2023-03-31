@@ -21,8 +21,8 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Country List</summary>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Country>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Country>))]
+        [ProducesResponseType(400)]
         public IActionResult GetCountries()
         {
             var countries = _mapper.Map<List<CountryDto>>
@@ -36,8 +36,8 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Country By Id</summary>
         [HttpGet("{countryId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Country))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(200, Type = typeof(Country))]
+        [ProducesResponseType(400)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetCountry(int countryId)
         {
@@ -55,8 +55,8 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Country Of An Owner</summary>
         [HttpGet("owners/{ownerId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Country))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(200, Type = typeof(Country))]
+        [ProducesResponseType(400)]
         public IActionResult GetCountryOfAnOwner(int ownerId)
         {
             var country = _mapper.Map<CountryDto>
@@ -66,6 +66,94 @@ namespace PokemonApi.Controllers
                 return BadRequest();
 
             return Ok(country);
+        }
+
+        ///<summary>Create Country</summary>
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
+        [ProducesResponseType(500)]
+        public IActionResult CreateCountry([FromBody] CountryDto countryCreate)
+        {
+            if (countryCreate == null)
+                return BadRequest(ModelState);
+
+            var country = _countryRepository.GetCountries()
+                .Where(c => c.Name.Trim().ToUpper() == countryCreate.Name.TrimEnd().ToUpper())
+                .FirstOrDefault();
+
+            if (country != null)
+            {
+                ModelState.AddModelError("", "Country already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var countryMap = _mapper.Map<Country>(countryCreate);
+
+            if (!_countryRepository.CreateCountry(countryMap))
+            {
+                ModelState.AddModelError("", "Something went wrong while savin");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created");
+        }
+
+        ///<summary>Update Category</summary>
+        [HttpPut("{countryId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult UpdateCategory(int countryId, [FromBody] CountryDto updatedCountry)
+        {
+            if (updatedCountry == null)
+                return BadRequest(ModelState);
+
+            if (countryId != updatedCountry.Id)
+                return BadRequest(ModelState);
+
+            if (!_countryRepository.CountryExists(countryId))
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var countryMap = _mapper.Map<Country>(updatedCountry);
+
+            if (!_countryRepository.UpdateCountry(countryMap))
+            {
+                ModelState.AddModelError("", "Something went wrong updating category");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        ///<summary>Delete Country</summary>
+        [HttpDelete("{countryId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteCountry(int countryId)
+        {
+            if (!_countryRepository.CountryExists(countryId))
+                return NotFound();
+
+            var countryToDelete = _countryRepository.GetCountry(countryId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_countryRepository.DeleteCountry(countryToDelete))
+                ModelState.AddModelError("", "Something went wrong deleting category");
+
+            return NoContent();
         }
     }
 }

@@ -14,6 +14,11 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
+        public bool ReviewerExists(int reviewerId)
+        {
+            return _context.Reviewers.Any(r => r.Id == reviewerId);
+        }
+
         public ICollection<Reviewer> GetReviewers()
         {
             return _context.Reviewers.ToList();
@@ -27,7 +32,6 @@ namespace PokemonApi.Repository
                 .FirstOrDefault();
         }
 
-
         public ICollection<Review> GetReviewsByReviewer(int reviewerId)
         {
             return _context.Reviews
@@ -35,9 +39,28 @@ namespace PokemonApi.Repository
                 .ToList();
         }
 
-        public bool ReviewerExists(int reviewerId)
+        public bool CreateReviewer(Reviewer reviewer)
         {
-            return _context.Reviewers.Any(r => r.Id == reviewerId);
+            _context.Add(reviewer);
+            return Save();
+        }
+
+        public bool UpdateReviewer(Reviewer reviewer)
+        {
+            _context.Update(reviewer);
+            return Save();
+        }
+
+        public bool DeleteReviewer(Reviewer reviewer)
+        {
+            _context.Remove(reviewer);
+            return Save();
+        }
+        
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved > 0 ? true : false;
         }
     }
 }

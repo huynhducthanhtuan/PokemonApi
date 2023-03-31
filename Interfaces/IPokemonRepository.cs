@@ -1,14 +1,21 @@
-﻿using PokemonApi.Models;
+﻿using PokemonApi.Dto;
+using PokemonApi.Models;
 
 namespace PokemonApi.Interfaces
 {
     public interface IPokemonRepository
     {
+        bool PokemonExists(int pokemonId);
+        bool PokemonExists(string pokemonName);
         ICollection<Pokemon> GetPokemons();
         Pokemon GetPokemon(int pokemonId);
         Pokemon GetPokemon(string pokemonName);
         double GetPokemonRating(int pokemonId);
-        bool PokemonExists(int pokemonId);
-        bool PokemonExists(string pokemonName);
+        Pokemon GetPokemonTrimToUpper(PokemonDto pokemonCreate);
+        bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon);
+        bool UpdatePokemon(int ownerId, int categoryId, Pokemon pokemon);
+        bool DeletePokemon(Pokemon pokemon);
+        // bool DeletePokemons(List<Pokemon> pokemons);
+        bool Save();
     }
 }

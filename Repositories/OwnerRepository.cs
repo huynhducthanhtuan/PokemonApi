@@ -12,6 +12,11 @@ namespace PokemonApi.Repository
         {
             _context = context;
         }
+        
+        public bool OwnerExists(int ownerId)
+        {
+            return _context.Owners.Any(o => o.Id == ownerId);
+        }
 
         public ICollection<Owner> GetOwners()
         {
@@ -33,7 +38,6 @@ namespace PokemonApi.Repository
                 .ToList();
         }
 
-
         public ICollection<Pokemon> GetPokemonByOwner(int ownerId)
         {
             return _context.PokemonOwners
@@ -42,9 +46,28 @@ namespace PokemonApi.Repository
                 .ToList();
         }
 
-        public bool OwnerExists(int ownerId)
+        public bool CreateOwner(Owner owner)
         {
-            return _context.Owners.Any(o => o.Id == ownerId);
+            _context.Add(owner);
+            return Save();
+        }
+
+        public bool UpdateOwner(Owner owner)
+        {
+            _context.Update(owner);
+            return Save();
+        }
+
+        public bool DeleteOwner(Owner owner)
+        {
+            _context.Remove(owner);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved > 0 ? true : false;
         }
     }
 }
