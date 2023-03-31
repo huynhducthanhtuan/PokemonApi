@@ -45,5 +45,5 @@ $ dotnet run seeddata
 #### 8. Run project
 
 ```bash
-$ dotnet run
+$ dotnet watch run
 ```
