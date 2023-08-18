@@ -1,49 +1,69 @@
 ## PokemonApi
 
+Review and rate your favorite pokemons
+
 #### 1. Clone project
 
 ```bash
-$ git clone https://github.com/huynhducthanhtuan/PokemonApi.git
+git clone https://github.com/huynhducthanhtuan/PokemonApi.git
 ```
 
-#### 2. Change directory to folder PokemonApi
+#### 2. Import SQL Server database from `pokemon_db.bak` file
+
+#### 3. Update SQL Server database connection string
+
+`appsettings.json`
 
 ```bash
-$ cd PokemonApi
+"ConnectionStrings": {
+  "DefaultConnection": "Data Source=THANHTUAN;Initial Catalog=pokemon_db;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+}
 ```
 
-#### 3. Build project
+##### Change `THANHTUAN` with your computer name
+
+#### 4. Build project
 
 ```bash
-$ dotnet build
+dotnet build
 ```
 
-#### 4. Install dotnet-ef if not already (Optional)
+#### 5. Run project
 
 ```bash
-$ dotnet tool install --global dotnet-ef
+dotnet watch run
 ```
 
-#### 5. Create a migration (Optional)
+<details><summary><b>Exception when step 2 fails</b></summary>
+
+#### 1. Install dotnet-ef if not already
 
 ```bash
-$ dotnet-ef migrations add Init
+dotnet tool install --global dotnet-ef
 ```
 
-#### 6. Update database definition from migration
+#### 2. Create a migration
 
 ```bash
-$ dotnet-ef database update
+dotnet-ef migrations add Init
 ```
 
-#### 7. Seeding data (Optional)
+#### 3. Update database definition from migration
 
 ```bash
-$ dotnet run seeddata
+dotnet-ef database update
 ```
 
-#### 8. Run project
+#### 4. Seeding data
 
 ```bash
-$ dotnet watch run
+dotnet run seeddata
 ```
+
+</details>
+
+### Reference Resources
+
+[ASP.NET Web API Tutorial 2022](https://www.youtube.com/playlist?list=PL82C6-O4XrHdiS10BLh23x71ve9mQCln0)
+
+[pokemon-review-api Repository](https://github.com/teddysmithdev/pokemon-review-api)
