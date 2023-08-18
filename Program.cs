@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using PokemonApi;
 using PokemonApi.Data;
 using PokemonApi.Interfaces;
 using PokemonApi.Repository;

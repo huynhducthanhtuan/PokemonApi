@@ -1,7 +1,6 @@
-﻿using PokemonApi.Data;
-using PokemonApi.Models;
+﻿using PokemonApi.Models;
 
-namespace PokemonApi
+namespace PokemonApi.Data
 {
     public class Seed
     {
