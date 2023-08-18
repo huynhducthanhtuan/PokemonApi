@@ -1,6 +1,6 @@
-﻿namespace PokemonApi.Dto
+﻿namespace PokemonApi.DTOs
 {
-    public class PokemonDto
+    public class PokemonDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -1,5 +1,5 @@
 ﻿using PokemonApi.Data;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -51,7 +51,7 @@ namespace PokemonApi.Repository
             return reviews.Sum(p => p.Rating) / reviews.Count();
         }
 
-        public Pokemon GetPokemonTrimToUpper(PokemonDto pokemonCreate)
+        public Pokemon GetPokemonTrimToUpper(PokemonDTO pokemonCreate)
         {
             return GetPokemons().Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper())
                 .FirstOrDefault();

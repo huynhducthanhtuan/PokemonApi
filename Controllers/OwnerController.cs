@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -30,7 +30,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetOwners()
         {
-            var owners = _mapper.Map<List<OwnerDto>>
+            var owners = _mapper.Map<List<OwnerDTO>>
                 (_ownerRepository.GetOwners());
 
             if (!ModelState.IsValid)
@@ -49,7 +49,7 @@ namespace PokemonApi.Controllers
             if (!_ownerRepository.OwnerExists(ownerId))
                 return NotFound();
 
-            var owner = _mapper.Map<OwnerDto>
+            var owner = _mapper.Map<OwnerDTO>
                 (_ownerRepository.GetOwner(ownerId));
 
             if (!ModelState.IsValid)
@@ -68,7 +68,7 @@ namespace PokemonApi.Controllers
             if (!_ownerRepository.OwnerExists(ownerId))
                 return NotFound();
 
-            var owner = _mapper.Map<List<PokemonDto>>(
+            var owner = _mapper.Map<List<PokemonDTO>>(
                 _ownerRepository.GetPokemonByOwner(ownerId));
 
             if (!ModelState.IsValid)
@@ -83,7 +83,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
-        public IActionResult CreateOwner([FromQuery] int countryId, [FromBody] OwnerDto ownerCreate)
+        public IActionResult CreateOwner([FromQuery] int countryId, [FromBody] OwnerDTO ownerCreate)
         {
             if (ownerCreate == null)
                 return BadRequest(ModelState);
@@ -119,7 +119,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDto updatedOwner)
+        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDTO updatedOwner)
         {
             if (updatedOwner == null)
                 return BadRequest(ModelState);

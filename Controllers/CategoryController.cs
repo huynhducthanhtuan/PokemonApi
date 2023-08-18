@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -25,7 +25,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetCategories()
         {
-            var categories = _mapper.Map<List<CategoryDto>>
+            var categories = _mapper.Map<List<CategoryDTO>>
                 (_categoryRepository.GetCategories());
 
             if (!ModelState.IsValid)
@@ -44,7 +44,7 @@ namespace PokemonApi.Controllers
             if (!_categoryRepository.CategoryExists(categoryId))
                 return NotFound();
 
-            var category = _mapper.Map<CategoryDto>
+            var category = _mapper.Map<CategoryDTO>
                 (_categoryRepository.GetCategory(categoryId));
 
             if (!ModelState.IsValid)
@@ -59,7 +59,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetPokemonByCategoryId(int categoryId)
         {
-            var pokemons = _mapper.Map<List<PokemonDto>>
+            var pokemons = _mapper.Map<List<PokemonDTO>>
                 (_categoryRepository.GetPokemonByCategory(categoryId));
 
             if (!ModelState.IsValid)
@@ -75,7 +75,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
-        public IActionResult CreateCategory([FromBody] CategoryDto categoryCreate)
+        public IActionResult CreateCategory([FromBody] CategoryDTO categoryCreate)
         {
             if (categoryCreate == null)
                 return BadRequest(ModelState);
@@ -110,7 +110,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto updatedCategory)
+        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDTO updatedCategory)
         {
             if (updatedCategory == null)
                 return BadRequest(ModelState);

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -25,7 +25,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetReviewers()
         {
-            var reviewers = _mapper.Map<List<ReviewerDto>>
+            var reviewers = _mapper.Map<List<ReviewerDTO>>
                 (_reviewerRepository.GetReviewers());
 
             if (!ModelState.IsValid)
@@ -44,7 +44,7 @@ namespace PokemonApi.Controllers
             if (!_reviewerRepository.ReviewerExists(reviewerId))
                 return NotFound();
 
-            var reviewer = _mapper.Map<ReviewerDto>
+            var reviewer = _mapper.Map<ReviewerDTO>
                 (_reviewerRepository.GetReviewer(reviewerId));
 
             if (!ModelState.IsValid)
@@ -63,7 +63,7 @@ namespace PokemonApi.Controllers
             if (!_reviewerRepository.ReviewerExists(reviewerId))
                 return NotFound();
 
-            var reviews = _mapper.Map<List<ReviewDto>>(
+            var reviews = _mapper.Map<List<ReviewDTO>>(
                 _reviewerRepository.GetReviewsByReviewer(reviewerId));
 
             if (!ModelState.IsValid)
@@ -78,7 +78,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
-        public IActionResult CreateReviewer([FromBody] ReviewerDto reviewerCreate)
+        public IActionResult CreateReviewer([FromBody] ReviewerDTO reviewerCreate)
         {
             if (reviewerCreate == null)
                 return BadRequest(ModelState);
@@ -113,7 +113,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateReviewer(int reviewerId, [FromBody] ReviewerDto updatedReviewer)
+        public IActionResult UpdateReviewer(int reviewerId, [FromBody] ReviewerDTO updatedReviewer)
         {
             if (updatedReviewer == null)
                 return BadRequest(ModelState);

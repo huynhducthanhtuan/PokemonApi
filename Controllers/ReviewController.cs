@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -34,7 +34,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetReviews()
         {
-            var reviews = _mapper.Map<List<ReviewDto>>
+            var reviews = _mapper.Map<List<ReviewDTO>>
                 (_reviewRepository.GetReviews());
 
             if (!ModelState.IsValid)
@@ -53,7 +53,7 @@ namespace PokemonApi.Controllers
             if (!_reviewRepository.ReviewExists(reviewId))
                 return NotFound();
 
-            var review = _mapper.Map<ReviewDto>
+            var review = _mapper.Map<ReviewDTO>
                 (_reviewRepository.GetReview(reviewId));
 
             if (!ModelState.IsValid)
@@ -68,7 +68,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetReviewsForAPokemon(int pokemonId)
         {
-            var reviews = _mapper.Map<List<ReviewDto>>
+            var reviews = _mapper.Map<List<ReviewDTO>>
                 (_reviewRepository.GetReviewsOfAPokemon(pokemonId));
 
             if (!ModelState.IsValid)
@@ -86,7 +86,7 @@ namespace PokemonApi.Controllers
         public IActionResult CreateReview(
             [FromQuery] int reviewerId,
             [FromQuery] int pokemonId,
-            [FromBody] ReviewDto reviewCreate
+            [FromBody] ReviewDTO reviewCreate
         )
         {
             if (reviewCreate == null)
@@ -124,7 +124,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateReview(int reviewId, [FromBody] ReviewDto updatedReview)
+        public IActionResult UpdateReview(int reviewId, [FromBody] ReviewDTO updatedReview)
         {
             if (updatedReview == null)
                 return BadRequest(ModelState);

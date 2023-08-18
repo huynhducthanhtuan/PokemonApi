@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -25,7 +25,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetCountries()
         {
-            var countries = _mapper.Map<List<CountryDto>>
+            var countries = _mapper.Map<List<CountryDTO>>
                 (_countryRepository.GetCountries());
 
             if (!ModelState.IsValid)
@@ -44,7 +44,7 @@ namespace PokemonApi.Controllers
             if (!_countryRepository.CountryExists(countryId))
                 return NotFound();
 
-            var country = _mapper.Map<CountryDto>
+            var country = _mapper.Map<CountryDTO>
                 (_countryRepository.GetCountry(countryId));
 
             if (!ModelState.IsValid)
@@ -59,7 +59,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetCountryOfAnOwner(int ownerId)
         {
-            var country = _mapper.Map<CountryDto>
+            var country = _mapper.Map<CountryDTO>
                 (_countryRepository.GetCountryByOwner(ownerId));
 
             if (!ModelState.IsValid)
@@ -75,7 +75,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
-        public IActionResult CreateCountry([FromBody] CountryDto countryCreate)
+        public IActionResult CreateCountry([FromBody] CountryDTO countryCreate)
         {
             if (countryCreate == null)
                 return BadRequest(ModelState);
@@ -110,7 +110,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateCategory(int countryId, [FromBody] CountryDto updatedCountry)
+        public IActionResult UpdateCategory(int countryId, [FromBody] CountryDTO updatedCountry)
         {
             if (updatedCountry == null)
                 return BadRequest(ModelState);

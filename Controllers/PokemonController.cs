@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -30,7 +30,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetPokemons()
         {
-            var pokemons = _mapper.Map<List<PokemonDto>>
+            var pokemons = _mapper.Map<List<PokemonDTO>>
                 (_pokemonRepository.GetPokemons());
 
             if (!ModelState.IsValid)
@@ -49,7 +49,7 @@ namespace PokemonApi.Controllers
             if (!_pokemonRepository.PokemonExists(pokemonId))
                 return NotFound();
 
-            var pokemon = _mapper.Map<PokemonDto>
+            var pokemon = _mapper.Map<PokemonDTO>
                 (_pokemonRepository.GetPokemon(pokemonId));
 
             if (!ModelState.IsValid)
@@ -70,7 +70,7 @@ namespace PokemonApi.Controllers
             if (!_pokemonRepository.PokemonExists(_pokemonName))
                 return NotFound();
 
-            var pokemon = _mapper.Map<PokemonDto>
+            var pokemon = _mapper.Map<PokemonDTO>
                 (_pokemonRepository.GetPokemon(_pokemonName));
 
             if (!ModelState.IsValid)
@@ -118,7 +118,7 @@ namespace PokemonApi.Controllers
         public IActionResult CreatePokemon(
             [FromQuery] int ownerId, 
             [FromQuery] int categoryId, 
-            [FromBody] PokemonDto pokemonCreate
+            [FromBody] PokemonDTO pokemonCreate
         ) {
             if (pokemonCreate == null)
                 return BadRequest(ModelState);
@@ -155,7 +155,7 @@ namespace PokemonApi.Controllers
             int pokemonId, 
             [FromQuery] int ownerId, 
             [FromQuery] int categoryId,
-            [FromBody] PokemonDto updatedPokemon
+            [FromBody] PokemonDTO updatedPokemon
         ) {
             if (updatedPokemon == null)
                 return BadRequest(ModelState);
