@@ -12,7 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>();
-builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddControllers().AddJsonOptions(
+    x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -52,21 +54,21 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Using Local SQLServer Database
-//builder.Services.AddDbContext<DataContext>(options =>
-//{
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-//});
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 // Using AWS RDS Database
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 28));
-builder.Services.AddDbContext<DataContext>(
-    dbContextOptions => dbContextOptions
-        .UseMySql(connectionString, serverVersion)
-        .LogTo(Console.WriteLine, LogLevel.Information)
-        .EnableSensitiveDataLogging(true)
-        .EnableDetailedErrors()
-);
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//var serverVersion = new MySqlServerVersion(new Version(8, 0, 28));
+//builder.Services.AddDbContext<DataContext>(
+//    dbContextOptions => dbContextOptions
+//        .UseMySql(connectionString, serverVersion)
+//        .LogTo(Console.WriteLine, LogLevel.Information)
+//        .EnableSensitiveDataLogging(true)
+//        .EnableDetailedErrors()
+//);
 
 // Repository Scope
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
