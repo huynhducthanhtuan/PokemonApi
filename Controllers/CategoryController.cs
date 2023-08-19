@@ -19,14 +19,14 @@ namespace PokemonApi.Controllers
             _mapper = mapper;
         }
 
-        ///<summary>Get Category List</summary>
+        ///<summary>Get List Of Categories</summary>
         [HttpGet("list")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Category>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<CategoryDTO>))]
         [ProducesResponseType(400)]
         public IActionResult GetCategories()
         {
-            var categories = _mapper.Map<List<CategoryDTO>>
-                (_categoryRepository.GetCategories());
+            IEnumerable<CategoryDTO> categories = 
+                _mapper.Map<IEnumerable<CategoryDTO>>(_categoryRepository.GetCategories());
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -36,7 +36,7 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Category By Id</summary>
         [HttpGet("{categoryId}")]
-        [ProducesResponseType(200, Type = typeof(Category))]
+        [ProducesResponseType(200, Type = typeof(CategoryDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public IActionResult GetCategory(int categoryId)
@@ -44,8 +44,8 @@ namespace PokemonApi.Controllers
             if (!_categoryRepository.CheckExistCategory(categoryId))
                 return NotFound();
 
-            var category = _mapper.Map<CategoryDTO>
-                (_categoryRepository.GetCategory(categoryId));
+            CategoryDTO category = 
+                _mapper.Map<CategoryDTO>(_categoryRepository.GetCategory(categoryId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -55,12 +55,12 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Pokemon By Category Id</summary>
         [HttpGet("pokemon/{categoryId}")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<PokemonDTO>))]
         [ProducesResponseType(400)]
-        public IActionResult GetPokemonByCategoryId(int categoryId)
+        public IActionResult GetPokemonByCategory(int categoryId)
         {
-            var pokemons = _mapper.Map<List<PokemonDTO>>
-                (_categoryRepository.GetPokemonByCategory(categoryId));
+            IEnumerable<PokemonDTO> pokemons = 
+                _mapper.Map<IEnumerable<PokemonDTO>>(_categoryRepository.GetPokemonByCategory(categoryId));
 
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -70,7 +70,6 @@ namespace PokemonApi.Controllers
 
         ///<summary>Create Category</summary>
         [HttpPost]
-        [ProducesResponseType(200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
@@ -80,7 +79,7 @@ namespace PokemonApi.Controllers
             if (categoryCreate == null)
                 return BadRequest(ModelState);
 
-            var category = _categoryRepository.GetCategories()
+            Category category = _categoryRepository.GetCategories()
                 .Where(c => c.Name.Trim().ToUpper() == categoryCreate.Name.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
@@ -93,7 +92,7 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var categoryMap = _mapper.Map<Category>(categoryCreate);
+            Category categoryMap = _mapper.Map<Category>(categoryCreate);
 
             if (!_categoryRepository.CreateCategory(categoryMap))
             {
@@ -101,7 +100,7 @@ namespace PokemonApi.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return NoContent();
         }
 
         ///<summary>Update Category</summary>
@@ -110,12 +109,12 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDTO updatedCategory)
+        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDTO updateCategory)
         {
-            if (updatedCategory == null)
+            if (updateCategory == null)
                 return BadRequest(ModelState);
 
-            if (categoryId != updatedCategory.Id)
+            if (categoryId != updateCategory.Id)
                 return BadRequest(ModelState);
 
             if (!_categoryRepository.CheckExistCategory(categoryId))
@@ -124,7 +123,7 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var categoryMap = _mapper.Map<Category>(updatedCategory);
+            Category categoryMap = _mapper.Map<Category>(updateCategory);
 
             if (!_categoryRepository.UpdateCategory(categoryMap))
             {
@@ -145,7 +144,7 @@ namespace PokemonApi.Controllers
             if (!_categoryRepository.CheckExistCategory(categoryId))
                 return NotFound();
 
-            var categoryToDelete = _categoryRepository.GetCategory(categoryId);
+            Category categoryToDelete = _categoryRepository.GetCategory(categoryId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

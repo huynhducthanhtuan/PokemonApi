@@ -18,7 +18,7 @@ namespace PokemonApi.Repository
             return _context.Categories.Any(c => c.Id == categoryId);
         }
 
-        public ICollection<Category> GetCategories()
+        public IEnumerable<Category> GetCategories()
         {
             return _context.Categories.ToList();
         }
@@ -30,7 +30,7 @@ namespace PokemonApi.Repository
                 .FirstOrDefault();
         }
 
-        public ICollection<Pokemon> GetPokemonByCategory(int categoryId)
+        public IEnumerable<Pokemon> GetPokemonByCategory(int categoryId)
         {
             return _context.PokemonCategories
                 .Where(e => e.CategoryId == categoryId)

@@ -19,12 +19,12 @@ namespace PokemonApi.Repository
             return _context.Owners.Any(o => o.Id == ownerId);
         }
 
-        public ICollection<Owner> GetOwners()
+        public IEnumerable<Owner> GetOwners()
         {
             return _context.Owners.ToList();
         }
 
-        public ICollection<Owner> GetOwnersByIds(int[] ownerIds)
+        public IEnumerable<Owner> GetOwnersByIds(int[] ownerIds)
         {
             return _context.Owners
                 .Where(o => ownerIds.Contains(o.Id))
@@ -38,7 +38,7 @@ namespace PokemonApi.Repository
                 .FirstOrDefault();
         }
 
-        public ICollection<Owner> GetOwnerOfAPokemon(int pokemonId)
+        public IEnumerable<Owner> GetOwnerOfPokemon(int pokemonId)
         {
             return (ICollection<Owner>)_context.PokemonOwners
                 .Where(p => p.Pokemon.Id == pokemonId)
@@ -46,7 +46,7 @@ namespace PokemonApi.Repository
                 .ToList();
         }
 
-        public ICollection<Pokemon> GetPokemonByOwner(int ownerId)
+        public IEnumerable<Pokemon> GetPokemonsByOwner(int ownerId)
         {
             return _context.PokemonOwners
                 .Where(p => p.Owner.Id == ownerId)
@@ -72,7 +72,7 @@ namespace PokemonApi.Repository
             return Save();
         }
 
-        public bool DeleteOwners(List<Owner> owners)
+        public bool DeleteOwners(IEnumerable<Owner> owners)
         {
             foreach (Owner owner in owners)
             {

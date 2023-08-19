@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
+using System.Collections.Generic;
 
 namespace PokemonApi.Controllers
 {
@@ -19,14 +20,14 @@ namespace PokemonApi.Controllers
             _mapper = mapper;
         }
 
-        ///<summary>Get Reviewer List</summary>
+        ///<summary>Get List Of Reviewers</summary>
         [HttpGet("list")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Reviewer>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewerDTO>))]
         [ProducesResponseType(400)]
         public IActionResult GetReviewers()
         {
-            var reviewers = _mapper.Map<List<ReviewerDTO>>
-                (_reviewerRepository.GetReviewers());
+            IEnumerable<ReviewerDTO> reviewers =
+                _mapper.Map<IEnumerable<ReviewerDTO>>(_reviewerRepository.GetReviewers());
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -34,14 +35,15 @@ namespace PokemonApi.Controllers
             return Ok(reviewers);
         }
 
-        ///<summary>Get Reviewers By Reviewer Ids</summary>
+        ///<summary>Get List Of Reviewers By Ids</summary>
         [HttpPost("list/ids")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Reviewer>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewerDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         public IActionResult GetReviewersByIds(int[] reviewerIds)
         {
-            List<Reviewer> reviewers = _reviewerRepository.GetReviewersByIds(reviewerIds).ToList();
+            IEnumerable<ReviewerDTO> reviewers =
+                _mapper.Map<IEnumerable<ReviewerDTO>>(_reviewerRepository.GetReviewersByIds(reviewerIds));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -51,7 +53,7 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Reviewer By Id</summary>
         [HttpGet("{reviewerId}")]
-        [ProducesResponseType(200, Type = typeof(Reviewer))]
+        [ProducesResponseType(200, Type = typeof(ReviewerDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public IActionResult GetPokemon(int reviewerId)
@@ -59,8 +61,8 @@ namespace PokemonApi.Controllers
             if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
-            var reviewer = _mapper.Map<ReviewerDTO>
-                (_reviewerRepository.GetReviewer(reviewerId));
+            ReviewerDTO reviewer =
+                _mapper.Map<ReviewerDTO>(_reviewerRepository.GetReviewer(reviewerId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -68,18 +70,18 @@ namespace PokemonApi.Controllers
             return Ok(reviewer);
         }
 
-        ///<summary>Get Reviews By A Reviewer</summary>
+        ///<summary>Get List Of Reviews Of Reviewer</summary>
         [HttpGet("{reviewerId}/reviews")]
-        [ProducesResponseType(200, Type = typeof(Reviewer))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult GetReviewsByAReviewer(int reviewerId)
+        public IActionResult GetReviewsOfReviewer(int reviewerId)
         {
             if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
-            var reviews = _mapper.Map<List<ReviewDTO>>(
-                _reviewerRepository.GetReviewsByReviewerId(reviewerId));
+            IEnumerable<ReviewDTO> reviews =
+                _mapper.Map<IEnumerable<ReviewDTO>>(_reviewerRepository.GetReviewsOfReviewer(reviewerId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -89,7 +91,7 @@ namespace PokemonApi.Controllers
 
         ///<summary>Create Reviewer</summary>
         [HttpPost]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
@@ -98,11 +100,11 @@ namespace PokemonApi.Controllers
             if (reviewerCreate == null)
                 return BadRequest(ModelState);
 
-            var country = _reviewerRepository.GetReviewers()
+            Reviewer reviewer = _reviewerRepository.GetReviewers()
                 .Where(c => c.LastName.Trim().ToUpper() == reviewerCreate.LastName.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
-            if (country != null)
+            if (reviewer != null)
             {
                 ModelState.AddModelError("", "Country already exists");
                 return StatusCode(422, ModelState);
@@ -111,15 +113,15 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var reviewerMap = _mapper.Map<Reviewer>(reviewerCreate);
+            Reviewer reviewerMap = _mapper.Map<Reviewer>(reviewerCreate);
 
             if (!_reviewerRepository.CreateReviewer(reviewerMap))
             {
-                ModelState.AddModelError("", "Something went wrong while savin");
+                ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return NoContent();
         }
 
         ///<summary>Update Reviewer</summary>
@@ -128,12 +130,12 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateReviewer(int reviewerId, [FromBody] ReviewerDTO updatedReviewer)
+        public IActionResult UpdateReviewer(int reviewerId, [FromBody] ReviewerDTO updateReviewer)
         {
-            if (updatedReviewer == null)
+            if (updateReviewer == null)
                 return BadRequest(ModelState);
 
-            if (reviewerId != updatedReviewer.Id)
+            if (reviewerId != updateReviewer.Id)
                 return BadRequest(ModelState);
 
             if (!_reviewerRepository.CheckExistReviewer(reviewerId))
@@ -142,11 +144,11 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var reviewerMap = _mapper.Map<Reviewer>(updatedReviewer);
+            Reviewer reviewerMap = _mapper.Map<Reviewer>(updateReviewer);
 
             if (!_reviewerRepository.UpdateReviewer(reviewerMap))
             {
-                ModelState.AddModelError("", "Something went wrong updating owner");
+                ModelState.AddModelError("", "Something went wrong when updating reviewer");
                 return StatusCode(500, ModelState);
             }
 
@@ -163,18 +165,21 @@ namespace PokemonApi.Controllers
             if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
-            var reviewerToDelete = _reviewerRepository.GetReviewer(reviewerId);
+            Reviewer reviewerToDelete = _reviewerRepository.GetReviewer(reviewerId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             if (!_reviewerRepository.DeleteReviewer(reviewerToDelete))
-                ModelState.AddModelError("", "Something went wrong deleting reviewer");
+            {
+                ModelState.AddModelError("", "Something went wrong when deleting reviewer");
+                return BadRequest(ModelState);
+            }
 
             return NoContent();
         }
 
-        ///<summary>Delete Reviewers By Reviewer Ids</summary>
+        ///<summary>Delete List Of Reviewers By Ids</summary>
         [HttpDelete("ids")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -182,14 +187,14 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(500)]
         public IActionResult DeleteReviewersByIds(int[] reviewerIds)
         {
-            List<Reviewer> reviewers = _reviewerRepository.GetReviewersByIds(reviewerIds).ToList();
+            IEnumerable<Reviewer> reviewers = _reviewerRepository.GetReviewersByIds(reviewerIds);
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
             if (!_reviewerRepository.DeleteReviewers(reviewers))
             {
-                ModelState.AddModelError("", "error deleting reviewers");
+                ModelState.AddModelError("", "Error when deleting reviewers");
                 return StatusCode(500, ModelState);
             }
 

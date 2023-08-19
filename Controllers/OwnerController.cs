@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
+using System.Collections.Generic;
 
 namespace PokemonApi.Controllers
 {
@@ -25,14 +26,14 @@ namespace PokemonApi.Controllers
             _mapper = mapper;
         }
 
-        ///<summary>Get Owner List</summary>
+        ///<summary>Get List Of Owners</summary>
         [HttpGet("list")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<OwnerDTO>))]
         [ProducesResponseType(400)]
         public IActionResult GetOwners()
         {
-            var owners = _mapper.Map<List<OwnerDTO>>
-                (_ownerRepository.GetOwners());
+            IEnumerable<OwnerDTO> owners =
+                _mapper.Map<IEnumerable<OwnerDTO>>(_ownerRepository.GetOwners());
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -40,24 +41,25 @@ namespace PokemonApi.Controllers
             return Ok(owners);
         }
 
-        ///<summary>Get Owners By Owner Ids</summary>
+        ///<summary>Get List Of Owners By Ids</summary>
         [HttpPost("list/ids")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<OwnerDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         public IActionResult GetOwnersByIds(int[] ownerIds)
         {
-            var owners = _ownerRepository.GetOwnersByIds(ownerIds).ToList();
+            IEnumerable<OwnerDTO> owners =
+                _mapper.Map<IEnumerable<OwnerDTO>>(_ownerRepository.GetOwnersByIds(ownerIds));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             return Ok(owners);
-        }        
+        }
 
         ///<summary>Get Owner By Id</summary>
         [HttpGet("{ownerId}")]
-        [ProducesResponseType(200, Type = typeof(Owner))]
+        [ProducesResponseType(200, Type = typeof(OwnerDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public IActionResult GetOwner(int ownerId)
@@ -65,8 +67,8 @@ namespace PokemonApi.Controllers
             if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
-            var owner = _mapper.Map<OwnerDTO>
-                (_ownerRepository.GetOwner(ownerId));
+            OwnerDTO owner =
+                _mapper.Map<OwnerDTO>(_ownerRepository.GetOwner(ownerId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -76,7 +78,7 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Pokemon By Owner Id</summary>
         [HttpGet("{ownerId}/pokemon")]
-        [ProducesResponseType(200, Type = typeof(Owner))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<PokemonDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public IActionResult GetPokemonByOwner(int ownerId)
@@ -84,8 +86,8 @@ namespace PokemonApi.Controllers
             if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
-            var owner = _mapper.Map<List<PokemonDTO>>(
-                _ownerRepository.GetPokemonByOwner(ownerId));
+            IEnumerable<PokemonDTO> owner =
+                _mapper.Map<IEnumerable<PokemonDTO>>(_ownerRepository.GetPokemonsByOwner(ownerId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -95,7 +97,7 @@ namespace PokemonApi.Controllers
 
         ///<summary>Create Owner</summary>
         [HttpPost]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
@@ -104,11 +106,11 @@ namespace PokemonApi.Controllers
             if (ownerCreate == null)
                 return BadRequest(ModelState);
 
-            var owners = _ownerRepository.GetOwners()
+            Owner owner = _ownerRepository.GetOwners()
                 .Where(c => c.LastName.Trim().ToUpper() == ownerCreate.LastName.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
-            if (owners != null)
+            if (owner != null)
             {
                 ModelState.AddModelError("", "Owner already exists");
                 return StatusCode(422, ModelState);
@@ -117,16 +119,16 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var ownerMap = _mapper.Map<Owner>(ownerCreate);
+            Owner ownerMap = _mapper.Map<Owner>(ownerCreate);
             ownerMap.Country = _countryRepository.GetCountry(countryId);
 
             if (!_ownerRepository.CreateOwner(ownerMap))
             {
-                ModelState.AddModelError("", "Something went wrong while savin");
+                ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return NoContent();
         }
 
         ///<summary>Update Owner</summary>
@@ -135,12 +137,12 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDTO updatedOwner)
+        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDTO updateOwner)
         {
-            if (updatedOwner == null)
+            if (updateOwner == null)
                 return BadRequest(ModelState);
 
-            if (ownerId != updatedOwner.Id)
+            if (ownerId != updateOwner.Id)
                 return BadRequest(ModelState);
 
             if (!_ownerRepository.CheckExistOwner(ownerId))
@@ -149,7 +151,7 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var ownerMap = _mapper.Map<Owner>(updatedOwner);
+            Owner ownerMap = _mapper.Map<Owner>(updateOwner);
 
             if (!_ownerRepository.UpdateOwner(ownerMap))
             {
@@ -170,7 +172,7 @@ namespace PokemonApi.Controllers
             if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
-            var ownerToDelete = _ownerRepository.GetOwner(ownerId);
+            Owner ownerToDelete = _ownerRepository.GetOwner(ownerId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -181,21 +183,21 @@ namespace PokemonApi.Controllers
             return NoContent();
         }
 
-        ///<summary>Delete Owners By Owner Ids</summary>
+        ///<summary>Delete List Of Owners By Ids</summary>
         [HttpDelete("ids")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         public IActionResult DeleteOwnersByIds(int[] ownerIds)
         {
-            List<Owner> ownersToDelete = _ownerRepository.GetOwnersByIds(ownerIds).ToList();
+            IEnumerable<Owner> ownersToDelete = _ownerRepository.GetOwnersByIds(ownerIds);
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
             if (!_ownerRepository.DeleteOwners(ownersToDelete))
             {
-                ModelState.AddModelError("", "error deleting owners");
+                ModelState.AddModelError("", "Error when deleting owners");
                 return StatusCode(500, ModelState);
             }
 

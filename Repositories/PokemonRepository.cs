@@ -24,12 +24,12 @@ namespace PokemonApi.Repository
             return _context.Pokemons.Any(p => p.Name == pokemonName);
         }
 
-        public ICollection<Pokemon> GetPokemons()
+        public IEnumerable<Pokemon> GetPokemons()
         {
             return _context.Pokemons.OrderBy(p => p.Id).ToList();
         }
 
-        public ICollection<Pokemon> GetPokemonsByIds(int[] pokemonIds)
+        public IEnumerable<Pokemon> GetPokemonsByIds(int[] pokemonIds)
         {
             return _context.Pokemons
                 .Where(o => pokemonIds.Contains(o.Id))
@@ -61,9 +61,7 @@ namespace PokemonApi.Repository
         public Pokemon GetPokemonTrimToUpper(PokemonDTO pokemonCreate)
         {
             return GetPokemons()
-                .Where(
-                    c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper()
-                 )
+                .Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper())
                 .FirstOrDefault();
         }
 
@@ -105,7 +103,7 @@ namespace PokemonApi.Repository
             return Save();
         }
 
-        public bool DeletePokemons(List<Pokemon> pokemons)
+        public bool DeletePokemons(IEnumerable<Pokemon> pokemons)
         {
             foreach (Pokemon pokemon in pokemons)
             {

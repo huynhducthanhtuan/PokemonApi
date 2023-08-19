@@ -19,14 +19,14 @@ namespace PokemonApi.Controllers
             _mapper = mapper;
         }
 
-        ///<summary>Get Country List</summary>
+        ///<summary>Get List Of Countries</summary>
         [HttpGet("list")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Country>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<CountryDTO>))]
         [ProducesResponseType(400)]
         public IActionResult GetCountries()
         {
-            var countries = _mapper.Map<List<CountryDTO>>
-                (_countryRepository.GetCountries());
+            IEnumerable<CountryDTO> countries = 
+                _mapper.Map<IEnumerable<CountryDTO>>(_countryRepository.GetCountries());
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -36,16 +36,16 @@ namespace PokemonApi.Controllers
 
         ///<summary>Get Country By Id</summary>
         [HttpGet("{countryId}")]
-        [ProducesResponseType(200, Type = typeof(Country))]
+        [ProducesResponseType(200, Type = typeof(CountryDTO))]
         [ProducesResponseType(400)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(404)]
         public IActionResult GetCountry(int countryId)
         {
             if (!_countryRepository.CheckExistCountry(countryId))
                 return NotFound();
 
-            var country = _mapper.Map<CountryDTO>
-                (_countryRepository.GetCountry(countryId));
+            CountryDTO country = 
+                _mapper.Map<CountryDTO>(_countryRepository.GetCountry(countryId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -53,14 +53,14 @@ namespace PokemonApi.Controllers
             return Ok(country);
         }
 
-        ///<summary>Get Country Of An Owner</summary>
+        ///<summary>Get Country Of Owner</summary>
         [HttpGet("owners/{ownerId}")]
-        [ProducesResponseType(200, Type = typeof(Country))]
+        [ProducesResponseType(200, Type = typeof(CountryDTO))]
         [ProducesResponseType(400)]
-        public IActionResult GetCountryOfAnOwner(int ownerId)
+        public IActionResult GetCountryOfOwner(int ownerId)
         {
-            var country = _mapper.Map<CountryDTO>
-                (_countryRepository.GetCountryByOwner(ownerId));
+            CountryDTO country = 
+                _mapper.Map<CountryDTO>(_countryRepository.GetCountryByOwner(ownerId));
 
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -70,7 +70,6 @@ namespace PokemonApi.Controllers
 
         ///<summary>Create Country</summary>
         [HttpPost]
-        [ProducesResponseType(200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
@@ -80,7 +79,7 @@ namespace PokemonApi.Controllers
             if (countryCreate == null)
                 return BadRequest(ModelState);
 
-            var country = _countryRepository.GetCountries()
+            Country country = _countryRepository.GetCountries()
                 .Where(c => c.Name.Trim().ToUpper() == countryCreate.Name.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
@@ -93,7 +92,7 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var countryMap = _mapper.Map<Country>(countryCreate);
+            Country countryMap = _mapper.Map<Country>(countryCreate);
 
             if (!_countryRepository.CreateCountry(countryMap))
             {
@@ -101,7 +100,7 @@ namespace PokemonApi.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created");
+            return NoContent();
         }
 
         ///<summary>Update Category</summary>
@@ -110,12 +109,12 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateCategory(int countryId, [FromBody] CountryDTO updatedCountry)
+        public IActionResult UpdateCategory(int countryId, [FromBody] CountryDTO updateCountry)
         {
-            if (updatedCountry == null)
+            if (updateCountry == null)
                 return BadRequest(ModelState);
 
-            if (countryId != updatedCountry.Id)
+            if (countryId != updateCountry.Id)
                 return BadRequest(ModelState);
 
             if (!_countryRepository.CheckExistCountry(countryId))
@@ -124,7 +123,7 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var countryMap = _mapper.Map<Country>(updatedCountry);
+            Country countryMap = _mapper.Map<Country>(updateCountry);
 
             if (!_countryRepository.UpdateCountry(countryMap))
             {
@@ -145,7 +144,7 @@ namespace PokemonApi.Controllers
             if (!_countryRepository.CheckExistCountry(countryId))
                 return NotFound();
 
-            var countryToDelete = _countryRepository.GetCountry(countryId);
+            Country countryToDelete = _countryRepository.GetCountry(countryId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
