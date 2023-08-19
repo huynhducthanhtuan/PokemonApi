@@ -20,13 +20,28 @@ namespace PokemonApi.Controllers
         }
 
         ///<summary>Get Reviewer List</summary>
-        [HttpGet]
+        [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Reviewer>))]
         [ProducesResponseType(400)]
         public IActionResult GetReviewers()
         {
             var reviewers = _mapper.Map<List<ReviewerDTO>>
                 (_reviewerRepository.GetReviewers());
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(reviewers);
+        }
+
+        ///<summary>Get Reviewers By Reviewer Ids</summary>
+        [HttpPost("list/ids")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Reviewer>))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult GetReviewersByIds(int[] reviewerIds)
+        {
+            List<Reviewer> reviewers = _reviewerRepository.GetReviewersByIds(reviewerIds).ToList();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -64,7 +79,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
 
             var reviews = _mapper.Map<List<ReviewDTO>>(
-                _reviewerRepository.GetReviewsByReviewer(reviewerId));
+                _reviewerRepository.GetReviewsByReviewerId(reviewerId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -155,6 +170,28 @@ namespace PokemonApi.Controllers
 
             if (!_reviewerRepository.DeleteReviewer(reviewerToDelete))
                 ModelState.AddModelError("", "Something went wrong deleting reviewer");
+
+            return NoContent();
+        }
+
+        ///<summary>Delete Reviewers By Reviewer Ids</summary>
+        [HttpDelete("ids")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult DeleteReviewersByIds(int[] reviewerIds)
+        {
+            List<Reviewer> reviewers = _reviewerRepository.GetReviewersByIds(reviewerIds).ToList();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (!_reviewerRepository.DeleteReviewers(reviewers))
+            {
+                ModelState.AddModelError("", "error deleting reviewers");
+                return StatusCode(500, ModelState);
+            }
 
             return NoContent();
         }

@@ -29,13 +29,28 @@ namespace PokemonApi.Controllers
         }
 
         ///<summary>Get Review List</summary>
-        [HttpGet]
+        [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
         [ProducesResponseType(400)]
         public IActionResult GetReviews()
         {
             var reviews = _mapper.Map<List<ReviewDTO>>
                 (_reviewRepository.GetReviews());
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(reviews);
+        }
+
+        ///<summary>Get Reviews By Review Ids</summary>
+        [HttpPost("list/ids")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult GetReviewsByIds(int[] reviewIds)
+        {
+            List<Review> reviews = _reviewRepository.GetReviewsByIds(reviewIds).ToList();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -77,7 +92,7 @@ namespace PokemonApi.Controllers
             return Ok(reviews);
         }
 
-        ///<summary></summary>
+        ///<summary>Create Review</summary>
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -176,17 +191,39 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult DeleteReviewsByReviewer(int reviewerId)
+        public IActionResult DeleteReviewsByReviewerId(int reviewerId)
         {
             if (!_reviewerRepository.ReviewerExists(reviewerId))
                 return NotFound();
 
-            var reviewsToDelete = _reviewerRepository.GetReviewsByReviewer(reviewerId).ToList();
+            var reviewsToDelete = _reviewerRepository.GetReviewsByReviewerId(reviewerId).ToList();
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
             if (!_reviewRepository.DeleteReviews(reviewsToDelete))
+            {
+                ModelState.AddModelError("", "error deleting reviews");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        ///<summary>Delete Reviews By Review Ids</summary>
+        [HttpDelete("ids")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult DeleteReviewsByIds(int[] reviewIds)
+        {
+            List<Review> reviews = _reviewRepository.GetReviewsByIds(reviewIds).ToList();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (!_reviewRepository.DeleteReviews(reviews))
             {
                 ModelState.AddModelError("", "error deleting reviews");
                 return StatusCode(500, ModelState);

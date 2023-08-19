@@ -11,8 +11,8 @@ namespace PokemonApi.Interfaces
         ICollection<Owner> GetOwnersFromACountry(int countryId);
         bool CreateCountry(Country country);
         bool UpdateCountry(Country country);
-        bool DeleteCountry(Country country);
-        // bool DeleteCountrys(List<Country> countrys);
+        bool DeleteCountry(Country Country);
+        //bool DeleteCountries(List<Country> countries);
         bool Save();
     }
 }

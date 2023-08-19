@@ -8,6 +8,7 @@ namespace PokemonApi.Interfaces
         bool PokemonExists(int pokemonId);
         bool PokemonExists(string pokemonName);
         ICollection<Pokemon> GetPokemons();
+        ICollection<Pokemon> GetPokemonsByIds(int[] pokemonIds);
         Pokemon GetPokemon(int pokemonId);
         Pokemon GetPokemon(string pokemonName);
         double GetPokemonRating(int pokemonId);
@@ -15,7 +16,7 @@ namespace PokemonApi.Interfaces
         bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon);
         bool UpdatePokemon(int ownerId, int categoryId, Pokemon pokemon);
         bool DeletePokemon(Pokemon pokemon);
-        // bool DeletePokemons(List<Pokemon> pokemons);
+        bool DeletePokemons(List<Pokemon> pokemons);
         bool Save();
     }
 }

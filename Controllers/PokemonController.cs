@@ -39,6 +39,21 @@ namespace PokemonApi.Controllers
                 return Ok(pokemons);
         }
 
+        ///<summary>Get Pokemons By Pokemon Ids</summary>
+        [HttpPost("list/ids")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult GetPokemonsByIds(int[] pokemonIds)
+        {
+            List<Pokemon> pokemons = _pokemonRepository.GetPokemonsByIds(pokemonIds).ToList();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(pokemons);
+        }
+
         ///<summary>Get Pokemon By Id</summary>
         [HttpGet("{pokemonId}")]
         [ProducesResponseType(200, Type = typeof(Pokemon))]
@@ -201,6 +216,28 @@ namespace PokemonApi.Controllers
 
             if (!_pokemonRepository.DeletePokemon(pokemonToDelete))
                 ModelState.AddModelError("", "Something went wrong deleting owner");
+
+            return NoContent();
+        }
+
+        ///<summary>Delete Pokemons By Pokemon Ids</summary>
+        [HttpDelete("ids")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult DeletePokemonsByIds(int[] pokemonIds)
+        {
+            List<Pokemon> pokemons = _pokemonRepository.GetPokemonsByIds(pokemonIds).ToList();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (!_pokemonRepository.DeletePokemons(pokemons))
+            {
+                ModelState.AddModelError("", "error deleting pokemons");
+                return StatusCode(500, ModelState);
+            }
 
             return NoContent();
         }

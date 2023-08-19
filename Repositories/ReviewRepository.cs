@@ -23,6 +23,13 @@ namespace PokemonApi.Repository
             return _context.Reviews.ToList();
         }
 
+        public ICollection<Review> GetReviewsByIds(int[] reviewIds)
+        {
+            return _context.Reviews
+                .Where(r => reviewIds.Contains(r.Id))
+                .ToList();
+        }
+
         public ICollection<Review> GetReviewsOfAPokemon(int pokemonId)
         {
             return _context.Reviews
@@ -51,13 +58,16 @@ namespace PokemonApi.Repository
 
         public bool DeleteReview(Review review)
         {
-           _context.Remove(review);
+            _context.Remove(review);
             return Save();
         }
 
         public bool DeleteReviews(List<Review> reviews)
         {
-            _context.RemoveRange(reviews);
+            foreach (Review review in reviews)
+            {
+                _context.Remove(review);
+            }
             return Save();
         }
 

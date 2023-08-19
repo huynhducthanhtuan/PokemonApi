@@ -20,7 +20,7 @@ namespace PokemonApi.Controllers
         }
 
         ///<summary>Get Country List</summary>
-        [HttpGet]
+        [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Country>))]
         [ProducesResponseType(400)]
         public IActionResult GetCountries()

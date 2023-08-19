@@ -1,4 +1,5 @@
-﻿using PokemonApi.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -23,6 +24,13 @@ namespace PokemonApi.Repository
             return _context.Owners.ToList();
         }
 
+        public ICollection<Owner> GetOwnersByIds(int[] ownerIds)
+        {
+            return _context.Owners
+                .Where(o => ownerIds.Contains(o.Id))
+                .ToList();
+        }
+
         public Owner GetOwner(int ownerId)
         {
             return _context.Owners
@@ -32,9 +40,9 @@ namespace PokemonApi.Repository
 
         public ICollection<Owner> GetOwnerOfAPokemon(int pokemonId)
         {
-            return _context.PokemonOwners
+            return (ICollection<Owner>)_context.PokemonOwners
                 .Where(p => p.Pokemon.Id == pokemonId)
-                .Select(o => o.Owner)
+                .Include(o => o.Owner)
                 .ToList();
         }
 
@@ -61,6 +69,15 @@ namespace PokemonApi.Repository
         public bool DeleteOwner(Owner owner)
         {
             _context.Remove(owner);
+            return Save();
+        }
+
+        public bool DeleteOwners(List<Owner> owners)
+        {
+            foreach (Owner owner in owners)
+            {
+                _context.Remove(owner);
+            }
             return Save();
         }
 

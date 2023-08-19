@@ -10,8 +10,8 @@ namespace PokemonApi.Interfaces
         ICollection<Pokemon> GetPokemonByCategory(int categoryId);
         bool CreateCategory(Category category);
         bool UpdateCategory(Category category);
-        bool DeleteCategory(Category category);
-        // bool DeleteCategories(List<Category> categories);
+        bool DeleteCategory(Category category);        
+        //bool DeleteCategories(List<Category> categories);
         bool Save();
     }
 }

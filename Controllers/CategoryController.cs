@@ -20,7 +20,7 @@ namespace PokemonApi.Controllers
         }
 
         ///<summary>Get Category List</summary>
-        [HttpGet]
+        [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Category>))]
         [ProducesResponseType(400)]
         public IActionResult GetCategories()

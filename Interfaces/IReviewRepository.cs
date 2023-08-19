@@ -6,6 +6,7 @@ namespace PokemonApi.Interfaces
     {
         bool ReviewExists(int reviewId);
         ICollection<Review> GetReviews();
+        ICollection<Review> GetReviewsByIds(int[] reviewIds);
         Review GetReview(int reviewId);
         ICollection<Review> GetReviewsOfAPokemon(int pokemonId);
         bool CreateReview(Review review);

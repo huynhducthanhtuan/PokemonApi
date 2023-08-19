@@ -29,6 +29,13 @@ namespace PokemonApi.Repository
             return _context.Pokemons.OrderBy(p => p.Id).ToList();
         }
 
+        public ICollection<Pokemon> GetPokemonsByIds(int[] pokemonIds)
+        {
+            return _context.Pokemons
+                .Where(o => pokemonIds.Contains(o.Id))
+                .ToList();
+        }
+
         public Pokemon GetPokemon(int id)
         {
             return _context.Pokemons.FirstOrDefault(p => p.Id == id);
@@ -53,14 +60,19 @@ namespace PokemonApi.Repository
 
         public Pokemon GetPokemonTrimToUpper(PokemonDTO pokemonCreate)
         {
-            return GetPokemons().Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper())
+            return GetPokemons()
+                .Where(
+                    c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper()
+                 )
                 .FirstOrDefault();
         }
 
         public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
         {
-            var pokemonOwnerEntity = _context.Owners.Where(a => a.Id == ownerId).FirstOrDefault();
-            var category = _context.Categories.Where(a => a.Id == categoryId).FirstOrDefault();
+            var pokemonOwnerEntity = _context.Owners
+                        .Where(a => a.Id == ownerId).FirstOrDefault();
+            var category = _context.Categories
+                        .Where(a => a.Id == categoryId).FirstOrDefault();
 
             var pokemonOwner = new PokemonOwner()
             {
@@ -90,6 +102,15 @@ namespace PokemonApi.Repository
         public bool DeletePokemon(Pokemon pokemon)
         {
             _context.Remove(pokemon);
+            return Save();
+        }
+
+        public bool DeletePokemons(List<Pokemon> pokemons)
+        {
+            foreach (Pokemon pokemon in pokemons)
+            {
+                _context.Remove(pokemon);
+            }
             return Save();
         }
 

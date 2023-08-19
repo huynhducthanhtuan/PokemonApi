@@ -24,6 +24,13 @@ namespace PokemonApi.Repository
             return _context.Reviewers.ToList();
         }
 
+        public ICollection<Reviewer> GetReviewersByIds(int[] reviewerIds)
+        {
+            return _context.Reviewers
+                .Where(r => reviewerIds.Contains(r.Id))
+                .ToList();
+        }
+
         public Reviewer GetReviewer(int reviewerId)
         {
             return _context.Reviewers
@@ -32,7 +39,7 @@ namespace PokemonApi.Repository
                 .FirstOrDefault();
         }
 
-        public ICollection<Review> GetReviewsByReviewer(int reviewerId)
+        public ICollection<Review> GetReviewsByReviewerId(int reviewerId)
         {
             return _context.Reviews
                 .Where(r => r.Reviewer.Id == reviewerId)
@@ -56,7 +63,16 @@ namespace PokemonApi.Repository
             _context.Remove(reviewer);
             return Save();
         }
-        
+
+        public bool DeleteReviewers(List<Reviewer> reviewers)
+        {
+            foreach (Reviewer reviewer in reviewers)
+            {
+                _context.Remove(reviewer);
+            }
+            return Save();
+        }
+
         public bool Save()
         {
             var saved = _context.SaveChanges();

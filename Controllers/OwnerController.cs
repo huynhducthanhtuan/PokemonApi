@@ -15,17 +15,18 @@ namespace PokemonApi.Controllers
         private readonly IMapper _mapper;
 
         public OwnerController(
-            IOwnerRepository ownerRepository, 
+            IOwnerRepository ownerRepository,
             ICountryRepository countryRepository,
             IMapper mapper
-        ) {
+        )
+        {
             _ownerRepository = ownerRepository;
             _countryRepository = countryRepository;
             _mapper = mapper;
         }
 
         ///<summary>Get Owner List</summary>
-        [HttpGet]
+        [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
         [ProducesResponseType(400)]
         public IActionResult GetOwners()
@@ -38,6 +39,21 @@ namespace PokemonApi.Controllers
 
             return Ok(owners);
         }
+
+        ///<summary>Get Owners By Owner Ids</summary>
+        [HttpPost("list/ids")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult GetOwnersByIds(int[] ownerIds)
+        {
+            var owners = _ownerRepository.GetOwnersByIds(ownerIds).ToList();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(owners);
+        }        
 
         ///<summary>Get Owner By Id</summary>
         [HttpGet("{ownerId}")]
@@ -161,6 +177,27 @@ namespace PokemonApi.Controllers
 
             if (!_ownerRepository.DeleteOwner(ownerToDelete))
                 ModelState.AddModelError("", "Something went wrong deleting owner");
+
+            return NoContent();
+        }
+
+        ///<summary>Delete Owners By Owner Ids</summary>
+        [HttpDelete("ids")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult DeleteOwnersByIds(int[] ownerIds)
+        {
+            List<Owner> ownersToDelete = _ownerRepository.GetOwnersByIds(ownerIds).ToList();
+
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (!_ownerRepository.DeleteOwners(ownersToDelete))
+            {
+                ModelState.AddModelError("", "error deleting owners");
+                return StatusCode(500, ModelState);
+            }
 
             return NoContent();
         }
