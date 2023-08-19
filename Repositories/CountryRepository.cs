@@ -13,7 +13,7 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
-        public bool CountryExists(int countryId)
+        public bool CheckExistCountry(int countryId)
         {
             return _context.Countries.Any(c => c.Id == countryId);
         }

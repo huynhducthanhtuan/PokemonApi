@@ -5,8 +5,8 @@ namespace PokemonApi.Interfaces
 {
     public interface IPokemonRepository
     {
-        bool PokemonExists(int pokemonId);
-        bool PokemonExists(string pokemonName);
+        bool CheckExistPokemon(int pokemonId);
+        bool CheckExistPokemon(string pokemonName);
         ICollection<Pokemon> GetPokemons();
         ICollection<Pokemon> GetPokemonsByIds(int[] pokemonIds);
         Pokemon GetPokemon(int pokemonId);

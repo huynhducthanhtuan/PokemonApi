@@ -61,7 +61,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetPokemon(int pokemonId)
         {
-            if (!_pokemonRepository.PokemonExists(pokemonId))
+            if (!_pokemonRepository.CheckExistPokemon(pokemonId))
                 return NotFound();
 
             var pokemon = _mapper.Map<PokemonDTO>
@@ -82,7 +82,7 @@ namespace PokemonApi.Controllers
         {
             string _pokemonName = HttpContext.Request.Query["pokemonName"];
 
-            if (!_pokemonRepository.PokemonExists(_pokemonName))
+            if (!_pokemonRepository.CheckExistPokemon(_pokemonName))
                 return NotFound();
 
             var pokemon = _mapper.Map<PokemonDTO>
@@ -101,7 +101,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetPokemonRating(int pokemonId)
         {
-            if (!_pokemonRepository.PokemonExists(pokemonId))
+            if (!_pokemonRepository.CheckExistPokemon(pokemonId))
                 return NotFound();
 
             var rating = _pokemonRepository.GetPokemonRating(pokemonId);
@@ -178,7 +178,7 @@ namespace PokemonApi.Controllers
             if (pokemonId != updatedPokemon.Id)
                 return BadRequest(ModelState);
 
-            if (!_pokemonRepository.PokemonExists(pokemonId))
+            if (!_pokemonRepository.CheckExistPokemon(pokemonId))
                 return NotFound();
 
             if (!ModelState.IsValid)
@@ -202,7 +202,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeletePokemon(int pokemonId)
         {
-            if (!_pokemonRepository.PokemonExists(pokemonId))
+            if (!_pokemonRepository.CheckExistPokemon(pokemonId))
                 return NotFound();
 
             var reviewsToDelete = _reviewRepository.GetReviewsOfAPokemon(pokemonId);

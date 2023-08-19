@@ -4,7 +4,7 @@ namespace PokemonApi.Interfaces
 {
     public interface IReviewRepository
     {
-        bool ReviewExists(int reviewId);
+        bool CheckExistReview(int reviewId);
         ICollection<Review> GetReviews();
         ICollection<Review> GetReviewsByIds(int[] reviewIds);
         Review GetReview(int reviewId);

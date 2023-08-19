@@ -41,7 +41,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetCountry(int countryId)
         {
-            if (!_countryRepository.CountryExists(countryId))
+            if (!_countryRepository.CheckExistCountry(countryId))
                 return NotFound();
 
             var country = _mapper.Map<CountryDTO>
@@ -118,7 +118,7 @@ namespace PokemonApi.Controllers
             if (countryId != updatedCountry.Id)
                 return BadRequest(ModelState);
 
-            if (!_countryRepository.CountryExists(countryId))
+            if (!_countryRepository.CheckExistCountry(countryId))
                 return NotFound();
 
             if (!ModelState.IsValid)
@@ -142,7 +142,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteCountry(int countryId)
         {
-            if (!_countryRepository.CountryExists(countryId))
+            if (!_countryRepository.CheckExistCountry(countryId))
                 return NotFound();
 
             var countryToDelete = _countryRepository.GetCountry(countryId);

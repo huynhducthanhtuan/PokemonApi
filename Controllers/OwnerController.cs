@@ -62,7 +62,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetOwner(int ownerId)
         {
-            if (!_ownerRepository.OwnerExists(ownerId))
+            if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
             var owner = _mapper.Map<OwnerDTO>
@@ -81,7 +81,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetPokemonByOwner(int ownerId)
         {
-            if (!_ownerRepository.OwnerExists(ownerId))
+            if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
             var owner = _mapper.Map<List<PokemonDTO>>(
@@ -143,7 +143,7 @@ namespace PokemonApi.Controllers
             if (ownerId != updatedOwner.Id)
                 return BadRequest(ModelState);
 
-            if (!_ownerRepository.OwnerExists(ownerId))
+            if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
             if (!ModelState.IsValid)
@@ -167,7 +167,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteOwner(int ownerId)
         {
-            if (!_ownerRepository.OwnerExists(ownerId))
+            if (!_ownerRepository.CheckExistOwner(ownerId))
                 return NotFound();
 
             var ownerToDelete = _ownerRepository.GetOwner(ownerId);

@@ -41,7 +41,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetCategory(int categoryId)
         {
-            if (!_categoryRepository.CategoryExists(categoryId))
+            if (!_categoryRepository.CheckExistCategory(categoryId))
                 return NotFound();
 
             var category = _mapper.Map<CategoryDTO>
@@ -118,7 +118,7 @@ namespace PokemonApi.Controllers
             if (categoryId != updatedCategory.Id)
                 return BadRequest(ModelState);
 
-            if (!_categoryRepository.CategoryExists(categoryId))
+            if (!_categoryRepository.CheckExistCategory(categoryId))
                 return NotFound();
 
             if (!ModelState.IsValid)
@@ -142,7 +142,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteCategory(int categoryId)
         {
-            if (!_categoryRepository.CategoryExists(categoryId))
+            if (!_categoryRepository.CheckExistCategory(categoryId))
                 return NotFound();
 
             var categoryToDelete = _categoryRepository.GetCategory(categoryId);

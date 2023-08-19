@@ -14,7 +14,7 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
-        public bool ReviewerExists(int reviewerId)
+        public bool CheckExistReviewer(int reviewerId)
         {
             return _context.Reviewers.Any(r => r.Id == reviewerId);
         }

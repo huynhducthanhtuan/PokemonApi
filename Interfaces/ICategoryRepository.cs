@@ -4,7 +4,7 @@ namespace PokemonApi.Interfaces
 {
     public interface ICategoryRepository
     {
-        bool CategoryExists(int categoryId);
+        bool CheckExistCategory(int categoryId);
         ICollection<Category> GetCategories();
         Category GetCategory(int categoryId);
         ICollection<Pokemon> GetPokemonByCategory(int categoryId);

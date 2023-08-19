@@ -14,7 +14,7 @@ namespace PokemonApi.Repository
             _context = context;
         }
         
-        public bool OwnerExists(int ownerId)
+        public bool CheckExistOwner(int ownerId)
         {
             return _context.Owners.Any(o => o.Id == ownerId);
         }

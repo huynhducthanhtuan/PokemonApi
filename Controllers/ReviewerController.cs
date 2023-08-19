@@ -56,7 +56,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetPokemon(int reviewerId)
         {
-            if (!_reviewerRepository.ReviewerExists(reviewerId))
+            if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
             var reviewer = _mapper.Map<ReviewerDTO>
@@ -75,7 +75,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetReviewsByAReviewer(int reviewerId)
         {
-            if (!_reviewerRepository.ReviewerExists(reviewerId))
+            if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
             var reviews = _mapper.Map<List<ReviewDTO>>(
@@ -136,7 +136,7 @@ namespace PokemonApi.Controllers
             if (reviewerId != updatedReviewer.Id)
                 return BadRequest(ModelState);
 
-            if (!_reviewerRepository.ReviewerExists(reviewerId))
+            if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
             if (!ModelState.IsValid)
@@ -160,7 +160,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(404)]
         public IActionResult DeleteReviewer(int reviewerId)
         {
-            if (!_reviewerRepository.ReviewerExists(reviewerId))
+            if (!_reviewerRepository.CheckExistReviewer(reviewerId))
                 return NotFound();
 
             var reviewerToDelete = _reviewerRepository.GetReviewer(reviewerId);

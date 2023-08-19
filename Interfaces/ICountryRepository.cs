@@ -4,7 +4,7 @@ namespace PokemonApi.Interfaces
 {
     public interface ICountryRepository
     {
-        bool CountryExists(int countryId);
+        bool CheckExistCountry(int countryId);
         ICollection<Country> GetCountries();
         Country GetCountry(int countryId);
         Country GetCountryByOwner(int ownerId);

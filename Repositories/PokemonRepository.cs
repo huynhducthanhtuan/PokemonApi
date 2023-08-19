@@ -14,12 +14,12 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
-        public bool PokemonExists(int pokemonId)
+        public bool CheckExistPokemon(int pokemonId)
         {
             return _context.Pokemons.Any(p => p.Id == pokemonId);
         }
 
-        public bool PokemonExists(string pokemonName)
+        public bool CheckExistPokemon(string pokemonName)
         {
             return _context.Pokemons.Any(p => p.Name == pokemonName);
         }

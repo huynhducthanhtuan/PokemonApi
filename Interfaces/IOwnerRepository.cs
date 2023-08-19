@@ -4,7 +4,7 @@ namespace PokemonApi.Interfaces
 {
     public interface IOwnerRepository
     {
-        bool OwnerExists(int ownerId);
+        bool CheckExistOwner(int ownerId);
         ICollection<Owner> GetOwners();
         ICollection<Owner> GetOwnersByIds(int[] ownerIds);
         Owner GetOwner(int ownerId);
