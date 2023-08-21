@@ -2,6 +2,8 @@
 
 Review and rate your favorite pokemons
 
+### Installation Guide
+
 #### 1. Clone project
 
 ```bash
@@ -61,6 +63,32 @@ dotnet run seeddata
 ```
 
 </details>
+
+### Demonstration
+
+#### Category APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Category.png)
+
+#### Country APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Country.png)
+
+#### Owner APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Owner.png)
+
+#### Pokemon APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Pokemon.png)
+
+#### Review APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Review.png)
+
+#### Reviewer APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Reviewer.png)
 
 ### Reference Resources
 
