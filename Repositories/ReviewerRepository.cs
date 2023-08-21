@@ -26,44 +26,62 @@ namespace PokemonApi.Repository
         public async Task<bool> CheckExistReviewer(string reviewerFirstName, string reviewerLastName)
         {
             return await _context.Reviewers
-                .AnyAsync(r => r.FirstName == reviewerFirstName || r.LastName == reviewerLastName);
+                .AnyAsync(r => r.FirstName == reviewerFirstName 
+                            || r.LastName == reviewerLastName);
         }
 
-        public async Task<IEnumerable<ReviewerDTO>> GetReviewers()
+        public async Task<IEnumerable<Reviewer>> GetReviewers()
         {
-            IEnumerable<Reviewer> reviewers = await _context.Reviewers.ToListAsync();
+            return await _context.Reviewers.ToListAsync();
+        }
+
+        public async Task<IEnumerable<ReviewerDTO>> GetReviewerDTOs()
+        {
+            IEnumerable<Reviewer> reviewers = await GetReviewers();
             IEnumerable<ReviewerDTO> reviewerDTOs = _mapper.Map<IEnumerable<ReviewerDTO>>(reviewers);
             return reviewerDTOs;
         }
 
-        public async Task<IEnumerable<ReviewerDTO>> GetReviewersByIds(int[] reviewerIds)
+        public async Task<IEnumerable<Reviewer>> GetReviewersByIds(int[] reviewerIds)
         {
-            IEnumerable<Reviewer> reviewers = await _context.Reviewers
+            return await _context.Reviewers
                 .Where(r => reviewerIds.Contains(r.Id))
                 .ToListAsync();
-            IEnumerable<ReviewerDTO> reviewerDTOs = 
-                _mapper.Map<IEnumerable<ReviewerDTO>>(reviewers);
+        }
+
+        public async Task<IEnumerable<ReviewerDTO>> GetReviewerDTOsByIds(int[] reviewerIds)
+        {
+            IEnumerable<Reviewer> reviewers = await GetReviewersByIds(reviewerIds);
+            IEnumerable<ReviewerDTO> reviewerDTOs = _mapper.Map<IEnumerable<ReviewerDTO>>(reviewers);
             return reviewerDTOs;
         }
 
-        public async Task<ReviewerDTO> GetReviewer(int reviewerId)
+        public async Task<Reviewer> GetReviewer(int reviewerId)
         {
-            Reviewer reviewer = await _context.Reviewers
+            return await _context.Reviewers
                 .Where(r => r.Id == reviewerId)
                 .Include(e => e.Reviews)
                 .FirstOrDefaultAsync();
-            ReviewerDTO reviewerDTO =
-                _mapper.Map<ReviewerDTO>(reviewer);
+        }
+
+        public async Task<ReviewerDTO> GetReviewerDTO(int reviewerId)
+        {
+            Reviewer reviewer = await GetReviewer(reviewerId);
+            ReviewerDTO reviewerDTO = _mapper.Map<ReviewerDTO>(reviewer);
             return reviewerDTO;
         }
 
-        public async Task<IEnumerable<ReviewDTO>> GetReviewsOfReviewer(int reviewerId)
+        public async Task<IEnumerable<Review>> GetReviewsOfReviewer(int reviewerId)
         {
-            IEnumerable<Review> reviews = await _context.Reviews
+            return await _context.Reviews
                 .Where(r => r.Reviewer.Id == reviewerId)
                 .ToListAsync();
-            IEnumerable<ReviewDTO> reviewDTOs =
-                _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
+        }
+
+        public async Task<IEnumerable<ReviewDTO>> GetReviewDTOsOfReviewer(int reviewerId)
+        {
+            IEnumerable<Review> reviews = await GetReviewsOfReviewer(reviewerId);
+            IEnumerable<ReviewDTO> reviewDTOs = _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
             return reviewDTOs;
         }
 
@@ -83,18 +101,14 @@ namespace PokemonApi.Repository
 
         public async Task<bool> DeleteReviewer(int reviewerId)
         {
-            ReviewerDTO reviewer = await GetReviewer(reviewerId);
-            Reviewer reviewerToDelete = _mapper.Map<Reviewer>(reviewer);
+            Reviewer reviewerToDelete = await GetReviewer(reviewerId);
             _context.Remove(reviewerToDelete);
             return Save();
         }
 
         public async Task<bool> DeleteReviewers(int[] reviewerIds)
         {
-            IEnumerable<ReviewerDTO> reviewers = await GetReviewersByIds(reviewerIds);
-            IEnumerable<Reviewer> reviewersToDelete =
-                _mapper.Map<IEnumerable<Reviewer>>(reviewers);
-
+            IEnumerable<Reviewer> reviewersToDelete = await GetReviewersByIds(reviewerIds);
             foreach (Reviewer reviewer in reviewersToDelete)
             {
                 _context.Remove(reviewer);

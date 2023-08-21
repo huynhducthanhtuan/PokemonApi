@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
-using PokemonApi.Models;
 
 namespace PokemonApi.Controllers
 {
@@ -29,7 +27,7 @@ namespace PokemonApi.Controllers
         public async Task<IActionResult> GetPokemons()
         {
             IEnumerable<PokemonDTO> pokemons = 
-                await _pokemonRepository.GetPokemons();
+                await _pokemonRepository.GetPokemonDTOs();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,7 +46,7 @@ namespace PokemonApi.Controllers
                 return BadRequest();
 
             IEnumerable<PokemonDTO> pokemons =
-                await _pokemonRepository.GetPokemonsByIds(pokemonIds);
+                await _pokemonRepository.GetPokemonDTOsByIds(pokemonIds);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -70,7 +68,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
 
             PokemonDTO pokemon =
-                await _pokemonRepository.GetPokemon(pokemonId);
+                await _pokemonRepository.GetPokemonDTO(pokemonId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -91,7 +89,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
 
             PokemonDTO pokemon = 
-                await _pokemonRepository.GetPokemon(_pokemonName);
+                await _pokemonRepository.GetPokemonDTO(_pokemonName);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -162,7 +160,7 @@ namespace PokemonApi.Controllers
 
             if (!await _pokemonRepository.CreatePokemon(ownerId, categoryId, pokemonCreate))
             {
-                ModelState.AddModelError("", "Something went wrong while savin");
+                ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 

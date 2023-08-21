@@ -23,62 +23,87 @@ namespace PokemonApi.Repository
             return await _context.Owners.AnyAsync(o => o.Id == ownerId);
         }
 
-        public async Task<IEnumerable<OwnerDTO>> GetOwners()
+        public async Task<IEnumerable<Owner>> GetOwners()
         {
-            IEnumerable<Owner> owners = await _context.Owners.ToListAsync();
+            return await _context.Owners.ToListAsync();
+        }
+
+        public async Task<IEnumerable<OwnerDTO>> GetOwnerDTOs()
+        {
+            IEnumerable<Owner> owners = await GetOwners();
             IEnumerable<OwnerDTO> ownerDTOs = _mapper.Map<IEnumerable<OwnerDTO>>(owners);
             return ownerDTOs;
         }
 
-        public async Task<IEnumerable<OwnerDTO>> GetOwnersByIds(int[] ownerIds)
+        public async Task<IEnumerable<Owner>> GetOwnersByIds(int[] ownerIds)
         {
-            IEnumerable<Owner> owners = await _context.Owners
+            return await _context.Owners
                 .Where(o => ownerIds.Contains(o.Id))
                 .ToListAsync();
-            IEnumerable<OwnerDTO> ownerDTOs =
-                _mapper.Map<IEnumerable<OwnerDTO>>(owners);
+        }
+
+        public async Task<IEnumerable<OwnerDTO>> GetOwnerDTOsByIds(int[] ownerIds)
+        {
+            IEnumerable<Owner> owners = await GetOwnersByIds(ownerIds);
+            IEnumerable<OwnerDTO> ownerDTOs = _mapper.Map<IEnumerable<OwnerDTO>>(owners);
             return ownerDTOs;
         }
 
-        public async Task<OwnerDTO> GetOwner(int ownerId)
+        public async Task<Owner> GetOwner(int ownerId)
         {
-            Owner owner = await _context.Owners
+            return await _context.Owners
                 .Where(o => o.Id == ownerId)
                 .FirstOrDefaultAsync();
-            OwnerDTO ownerDTO = 
-                _mapper.Map<OwnerDTO>(owner);
+        }
+
+        public async Task<OwnerDTO> GetOwnerDTO(int ownerId)
+        {
+            Owner owner = await GetOwner(ownerId);
+            OwnerDTO ownerDTO = _mapper.Map<OwnerDTO>(owner);
             return ownerDTO;
         }
 
-        public async Task<OwnerDTO> GetOwner(string ownerFirstName, string ownerLastName)
+        public async Task<Owner> GetOwner(string ownerFirstName, string ownerLastName)
         {
-            Owner owner = await _context.Owners
+            return await _context.Owners
                 .Where(o => o.FirstName == ownerFirstName && o.LastName == ownerLastName)
                 .FirstOrDefaultAsync();
-            OwnerDTO ownerDTO = 
-                _mapper.Map<OwnerDTO>(owner);
+        }
+
+        public async Task<OwnerDTO> GetOwnerDTO(string ownerFirstName, string ownerLastName)
+        {
+            Owner owner = await GetOwner(ownerFirstName, ownerLastName);
+            OwnerDTO ownerDTO = _mapper.Map<OwnerDTO>(owner);
             return ownerDTO;
         }
 
-        public async Task<OwnerDTO> GetOwnerOfPokemon(int pokemonId)
+        public async Task<Owner> GetOwnerOfPokemon(int pokemonId)
         {
-            Owner owner = await _context.PokemonOwners
-                .Where(p => p.Pokemon.Id == pokemonId)
+            return await _context.PokemonOwners
+                .Where(o => o.Pokemon.Id == pokemonId)
                 .Select(o => o.Owner)
                 .FirstOrDefaultAsync();
-            OwnerDTO ownerDTO = 
-                _mapper.Map<OwnerDTO>(owner);
+        }
+
+        public async Task<OwnerDTO> GetOwnerDTOOfPokemon(int pokemonId)
+        {
+            Owner owner = await GetOwnerOfPokemon(pokemonId);
+            OwnerDTO ownerDTO = _mapper.Map<OwnerDTO>(owner);
             return ownerDTO;
         }
 
-        public async Task<IEnumerable<PokemonDTO>> GetPokemonsByOwner(int ownerId)
+        public async Task<IEnumerable<Pokemon>> GetPokemonsByOwner(int ownerId)
         {
-            IEnumerable<Pokemon> pokemons = await _context.PokemonOwners
+            return await _context.PokemonOwners
                 .Where(p => p.Owner.Id == ownerId)
                 .Select(p => p.Pokemon)
                 .ToListAsync();
-            IEnumerable<PokemonDTO> pokemonDTOs =
-                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+        }
+
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonDTOsByOwner(int ownerId)
+        {
+            IEnumerable<Pokemon> pokemons = await GetPokemonsByOwner(ownerId);
+            IEnumerable<PokemonDTO> pokemonDTOs = _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
             return pokemonDTOs;
         }
 
@@ -102,17 +127,14 @@ namespace PokemonApi.Repository
 
         public async Task<bool> DeleteOwner(int ownerId)
         {
-            OwnerDTO owner = await GetOwner(ownerId);
-            Owner ownerToDelete = _mapper.Map<Owner>(owner);
+            Owner ownerToDelete = await GetOwner(ownerId);
             _context.Remove(ownerToDelete);
             return Save();
         }
 
         public async Task<bool> DeleteOwners(int[] ownerIds)
         {
-            IEnumerable<OwnerDTO> owners = await GetOwnersByIds(ownerIds);
-            IEnumerable<Owner> ownersToDelete = _mapper.Map<IEnumerable<Owner>>(owners);
-
+            IEnumerable<Owner> ownersToDelete = await GetOwnersByIds(ownerIds);
             foreach (Owner owner in ownersToDelete)
             {
                 _context.Remove(owner);

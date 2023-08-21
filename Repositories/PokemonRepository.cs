@@ -11,11 +11,20 @@ namespace PokemonApi.Repository
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly IOwnerRepository _ownerRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public PokemonRepository(DataContext context, IMapper mapper)
+        public PokemonRepository(
+            DataContext context, 
+            IMapper mapper, 
+            IOwnerRepository ownerRepository,
+            ICategoryRepository categoryRepository
+        )
         {
             _context = context;
             _mapper = mapper;
+            _ownerRepository = ownerRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<bool> CheckExistPokemon(int pokemonId)
@@ -28,40 +37,52 @@ namespace PokemonApi.Repository
             return await _context.Pokemons.AnyAsync(p => p.Name == pokemonName);
         }
 
-        public async Task<IEnumerable<PokemonDTO>> GetPokemons()
+        public async Task<IEnumerable<Pokemon>> GetPokemons()
         {
-            IEnumerable<Pokemon> pokemons =
-                await _context.Pokemons.OrderBy(p => p.Id).ToListAsync();
-            IEnumerable<PokemonDTO> pokemonDTOs =
-                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+            return await _context.Pokemons.OrderBy(p => p.Id).ToListAsync();
+        }
+
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonDTOs()
+        {
+            IEnumerable<Pokemon> pokemons = await GetPokemons();
+            IEnumerable<PokemonDTO> pokemonDTOs = _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
             return pokemonDTOs;
         }
 
-        public async Task<IEnumerable<PokemonDTO>> GetPokemonsByIds(int[] pokemonIds)
+        public async Task<IEnumerable<Pokemon>> GetPokemonsByIds(int[] pokemonIds)
         {
-            IEnumerable<Pokemon> pokemons = await _context.Pokemons
+            return await _context.Pokemons
                 .Where(o => pokemonIds.Contains(o.Id))
                 .ToListAsync();
-            IEnumerable<PokemonDTO> pokemonDTOs =
-                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+        }
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonDTOsByIds(int[] pokemonIds)
+        {
+            IEnumerable<Pokemon> pokemons = await GetPokemonsByIds(pokemonIds);
+            IEnumerable<PokemonDTO> pokemonDTOs = _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
             return pokemonDTOs;
         }
 
-        public async Task<PokemonDTO> GetPokemon(int pokemonId)
+        public async Task<Pokemon> GetPokemon(int pokemonId)
         {
-            Pokemon pokemon =
-                await _context.Pokemons.FirstOrDefaultAsync(p => p.Id == pokemonId);
-            PokemonDTO pokemonDTO =
-                _mapper.Map<PokemonDTO>(pokemon);
+            return await _context.Pokemons.FirstOrDefaultAsync(p => p.Id == pokemonId);
+        }
+
+        public async Task<PokemonDTO> GetPokemonDTO(int pokemonId)
+        {
+            Pokemon pokemon = await GetPokemon(pokemonId);
+            PokemonDTO pokemonDTO = _mapper.Map<PokemonDTO>(pokemon);
             return pokemonDTO;
         }
 
-        public async Task<PokemonDTO> GetPokemon(string pokemonName)
+        public async Task<Pokemon> GetPokemon(string pokemonName)
         {
-            Pokemon pokemon =
-                await _context.Pokemons.FirstOrDefaultAsync(p => p.Name == pokemonName);
-            PokemonDTO pokemonDTO =
-                _mapper.Map<PokemonDTO>(pokemon);
+            return await _context.Pokemons.FirstOrDefaultAsync(p => p.Name == pokemonName);
+        }
+
+        public async Task<PokemonDTO> GetPokemonDTO(string pokemonName)
+        {
+            Pokemon pokemon = await GetPokemon(pokemonName);
+            PokemonDTO pokemonDTO = _mapper.Map<PokemonDTO>(pokemon);
             return pokemonDTO;
         }
 
@@ -87,10 +108,8 @@ namespace PokemonApi.Repository
             PokemonDTO pokemonCreate
         )
         {
-            Owner owner = await _context.Owners
-                        .Where(a => a.Id == ownerId).FirstOrDefaultAsync();
-            Category category = await _context.Categories
-                        .Where(a => a.Id == categoryId).FirstOrDefaultAsync();
+            Owner owner = await _ownerRepository.GetOwner(ownerId);
+            Category category = await _categoryRepository.GetCategory(categoryId);
             Pokemon pokemon = _mapper.Map<Pokemon>(pokemonCreate);    
 
             PokemonOwner pokemonOwner = new PokemonOwner()
@@ -108,7 +127,6 @@ namespace PokemonApi.Repository
             await _context.AddAsync(pokemonCategory);
 
             await _context.AddAsync(pokemonCreate);
-
             return Save();
         }
 
@@ -121,18 +139,14 @@ namespace PokemonApi.Repository
 
         public async Task<bool> DeletePokemon(int pokemonId)
         {
-            PokemonDTO reviews = await GetPokemon(pokemonId);
-            Pokemon pokemonToDelete = _mapper.Map<Pokemon>(reviews);
-
+            Pokemon pokemonToDelete = await GetPokemon(pokemonId);
             _context.Remove(pokemonToDelete);
             return Save();
         }
 
         public async Task<bool> DeletePokemons(int[] pokemonIds)
         {
-            IEnumerable<PokemonDTO> pokemons = await GetPokemonsByIds(pokemonIds);
-            IEnumerable<Pokemon> pokemonsToDelete = _mapper.Map<IEnumerable<Pokemon>>(pokemons);
-
+            IEnumerable<Pokemon> pokemonsToDelete = await GetPokemonsByIds(pokemonIds);
             foreach (Pokemon pokemon in pokemonsToDelete)
             {
                 _context.Remove(pokemon);

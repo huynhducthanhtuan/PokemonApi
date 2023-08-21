@@ -27,7 +27,7 @@ namespace PokemonApi.Controllers
         public async Task<IActionResult> GetOwners()
         {
             IEnumerable<OwnerDTO> owners = 
-                await _ownerRepository.GetOwners();
+                await _ownerRepository.GetOwnerDTOs();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -46,7 +46,7 @@ namespace PokemonApi.Controllers
                 return BadRequest();
 
             IEnumerable<OwnerDTO> owners = 
-                await _ownerRepository.GetOwnersByIds(ownerIds);
+                await _ownerRepository.GetOwnerDTOsByIds(ownerIds);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -68,7 +68,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
 
             OwnerDTO owner = 
-                await _ownerRepository.GetOwner(ownerId);
+                await _ownerRepository.GetOwnerDTO(ownerId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -90,7 +90,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
 
             IEnumerable<PokemonDTO> pokemons =
-                await _ownerRepository.GetPokemonsByOwner(ownerId);
+                await _ownerRepository.GetPokemonDTOsByOwner(ownerId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -112,8 +112,10 @@ namespace PokemonApi.Controllers
             if (countryId == null || ownerCreate == null)
                 return BadRequest(ModelState);
 
-            OwnerDTO owner =
-                await _ownerRepository.GetOwner(ownerCreate.FirstName, ownerCreate.LastName);
+            OwnerDTO owner = await _ownerRepository.GetOwnerDTO(
+                ownerCreate.FirstName, 
+                ownerCreate.LastName
+            );
 
             if (owner != null)
             {
@@ -121,7 +123,7 @@ namespace PokemonApi.Controllers
                 return StatusCode(422, ModelState);
             }
 
-            CountryDTO country = await _countryRepository.GetCountry(countryId);
+            CountryDTO country = await _countryRepository.GetCountryDTO(countryId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

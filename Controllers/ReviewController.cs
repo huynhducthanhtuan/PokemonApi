@@ -26,7 +26,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetReviews()
         {
-            IEnumerable<ReviewDTO> reviews = await _reviewRepository.GetReviews();
+            IEnumerable<ReviewDTO> reviews = 
+                await _reviewRepository.GetReviewDTOs();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -45,7 +46,7 @@ namespace PokemonApi.Controllers
                 return BadRequest(ModelState);
 
             IEnumerable<ReviewDTO> reviews = 
-                await _reviewRepository.GetReviewsByIds(reviewIds);
+                await _reviewRepository.GetReviewDTOsByIds(reviewIds);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -66,7 +67,7 @@ namespace PokemonApi.Controllers
             if (!await _reviewRepository.CheckExistReview(reviewId))
                 return NotFound();
 
-            ReviewDTO review = await _reviewRepository.GetReview(reviewId);
+            ReviewDTO review = await _reviewRepository.GetReviewDTO(reviewId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -84,7 +85,7 @@ namespace PokemonApi.Controllers
                 return BadRequest(ModelState);
 
             IEnumerable<ReviewDTO> reviews =
-                await _reviewRepository.GetReviewsOfPokemon(pokemonId);
+                await _reviewRepository.GetReviewDTOsOfPokemon(pokemonId);
 
             if (!ModelState.IsValid)
                 return BadRequest();

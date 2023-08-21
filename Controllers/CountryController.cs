@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
-using PokemonApi.Models;
 
 namespace PokemonApi.Controllers
 {
@@ -23,7 +21,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetCountries()
         {
-            IEnumerable<CountryDTO> countries = await _countryRepository.GetCountries();
+            IEnumerable<CountryDTO> countries = 
+                await _countryRepository.GetCountryDTOs();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -44,7 +43,8 @@ namespace PokemonApi.Controllers
             if (!await _countryRepository.CheckExistCountry(countryId))
                 return NotFound();
 
-            CountryDTO country = await _countryRepository.GetCountry(countryId);
+            CountryDTO country = 
+                await _countryRepository.GetCountryDTO(countryId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -61,7 +61,8 @@ namespace PokemonApi.Controllers
             if (ownerId == null)
                 return BadRequest();
 
-            CountryDTO country = await _countryRepository.GetCountryByOwner(ownerId);
+            CountryDTO country = 
+                await _countryRepository.GetCountryDTOByOwner(ownerId);
 
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -83,7 +84,7 @@ namespace PokemonApi.Controllers
                 return BadRequest(ModelState);
 
             CountryDTO country = 
-                await _countryRepository.GetCountry(countryCreate.Name);
+                await _countryRepository.GetCountryDTO(countryCreate.Name);
 
             if (country != null)
             {

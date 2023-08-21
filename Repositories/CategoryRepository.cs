@@ -23,41 +23,58 @@ namespace PokemonApi.Repository
             return await _context.Categories.AnyAsync(c => c.Id == categoryId);
         }
 
-        public async Task<IEnumerable<CategoryDTO>> GetCategories()
+        public async Task<IEnumerable<Category>> GetCategories()
         {
-            IEnumerable<Category> categories = await _context.Categories.ToListAsync();
+            return await _context.Categories.ToListAsync();
+        }
+
+        public async Task<IEnumerable<CategoryDTO>> GetCategoryDTOs()
+        {
+            IEnumerable<Category> categories = await GetCategories();
             IEnumerable<CategoryDTO> categoryDTOs = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
             return categoryDTOs;
         }
 
-        public async Task<CategoryDTO> GetCategory(int categoryId)
+        public async Task<Category> GetCategory(int categoryId)
         {
-            Category category = await _context.Categories
+            return await _context.Categories
                 .Where(c => c.Id == categoryId)
                 .FirstOrDefaultAsync();
-            CategoryDTO categoryDTO = 
-                _mapper.Map<CategoryDTO>(category);
+        }
+
+        public async Task<CategoryDTO> GetCategoryDTO(int categoryId)
+        {
+            Category category = await GetCategory(categoryId);
+            CategoryDTO categoryDTO = _mapper.Map<CategoryDTO>(category);
             return categoryDTO;
         }
 
-        public async Task<CategoryDTO> GetCategory(string categoryName)
+        public async Task<Category> GetCategory(string categoryName)
         {
-            Category category = await _context.Categories
+            return await _context.Categories
                 .Where(c => c.Name == categoryName)
                 .FirstOrDefaultAsync();
-            CategoryDTO categoryDTO = 
-                _mapper.Map<CategoryDTO>(category);
+        }
+
+        public async Task<CategoryDTO> GetCategoryDTO(string categoryName)
+        {
+            Category category = await GetCategory(categoryName);
+            CategoryDTO categoryDTO = _mapper.Map<CategoryDTO>(category);
             return categoryDTO;
         }
 
-        public async Task<IEnumerable<PokemonDTO>> GetPokemonsByCategory(int categoryId)
+        public async Task<IEnumerable<Pokemon>> GetPokemonsByCategory(int categoryId)
         {
-            IEnumerable<Pokemon> pokemons = await _context.PokemonCategories
+            return await _context.PokemonCategories
                 .Where(pc => pc.CategoryId == categoryId)
                 .Select(pc => pc.Pokemon)
                 .ToListAsync();
-            IEnumerable<PokemonDTO> pokemonDTOs = 
-                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+        }
+
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonDTOsByCategory(int categoryId)
+        {
+            IEnumerable<Pokemon> pokemons = await GetPokemonsByCategory(categoryId);
+            IEnumerable<PokemonDTO> pokemonDTOs = _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
             return pokemonDTOs;
         }
 
@@ -77,8 +94,7 @@ namespace PokemonApi.Repository
 
         public async Task<bool> DeleteCategory(int categoryId)
         {
-            CategoryDTO category = await GetCategory(categoryId);
-            Category categoryToDelete = _mapper.Map<Category>(category);
+            Category categoryToDelete = await GetCategory(categoryId);
             _context.Remove(categoryToDelete);
             return Save();
         }

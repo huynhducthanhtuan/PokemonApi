@@ -23,46 +23,71 @@ namespace PokemonApi.Repository
             return await _context.Countries.AnyAsync(c => c.Id == countryId);
         }
 
-        public async Task<IEnumerable<CountryDTO>> GetCountries()
+        public async Task<IEnumerable<Country>> GetCountries()
         {
-            IEnumerable<Country> countries = await _context.Countries.ToListAsync();
+            return await _context.Countries.ToListAsync();
+        }
+
+        public async Task<IEnumerable<CountryDTO>> GetCountryDTOs()
+        {
+            IEnumerable<Country> countries = await GetCountries();
             IEnumerable<CountryDTO> countryDTOs = _mapper.Map<IEnumerable<CountryDTO>>(countries);
             return countryDTOs;
         }
 
-        public async Task<CountryDTO> GetCountry(int countryId)
+        public async Task<Country> GetCountry(int countryId)
         {
-            Country country = await _context.Countries
+            return await _context.Countries
                 .Where(c => c.Id == countryId)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<CountryDTO> GetCountryDTO(int countryId)
+        {
+            Country country = await GetCountry(countryId);
             CountryDTO countryDTO = _mapper.Map<CountryDTO>(country);
             return countryDTO;
         }
 
-        public async Task<CountryDTO> GetCountry(string countryName)
+        public async Task<Country> GetCountry(string countryName)
         {
-            Country country = await _context.Countries
+            return await _context.Countries
                 .Where(c => c.Name == countryName)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<CountryDTO> GetCountryDTO(string countryName)
+        {
+            Country country = await GetCountry(countryName);
             CountryDTO countryDTO = _mapper.Map<CountryDTO>(country);
             return countryDTO;
         }
 
-        public async Task<CountryDTO> GetCountryByOwner(int ownerId)
+        public async Task<Country> GetCountryByOwner(int ownerId)
         {
-            Country country = await _context.Owners
+            return await _context.Owners
                 .Where(o => o.Id == ownerId)
                 .Select(o => o.Country)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<CountryDTO> GetCountryDTOByOwner(int ownerId)
+        {
+            Country country = await GetCountryByOwner(ownerId);
             CountryDTO countryDTO = _mapper.Map<CountryDTO>(country);
             return countryDTO;
         }
 
-        public async Task<IEnumerable<OwnerDTO>> GetOwnersFromCountry(int countryId)
+        public async Task<IEnumerable<Owner>> GetOwnersFromCountry(int countryId)
         {
-            IEnumerable<Owner> owners = await _context.Owners
+            return await _context.Owners
                 .Where(c => c.Country.Id == countryId)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<OwnerDTO>> GetOwnerDTOsFromCountry(int countryId)
+        {
+            IEnumerable<Owner> owners = await GetOwnersFromCountry(countryId);
             IEnumerable<OwnerDTO> ownerDTOs = _mapper.Map<IEnumerable<OwnerDTO>>(owners);
             return ownerDTOs;
         }
@@ -83,8 +108,7 @@ namespace PokemonApi.Repository
 
         public async Task<bool> DeleteCountry(int countryId)
         {
-            CountryDTO country = await GetCountry(countryId);
-            Country countryToDelete = _mapper.Map<Country>(country);
+            Country countryToDelete = await GetCountry(countryId);
             _context.Remove(countryToDelete);
             return Save();
         }

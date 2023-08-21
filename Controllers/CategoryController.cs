@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
-using PokemonApi.Models;
 
 namespace PokemonApi.Controllers
 {
@@ -24,7 +22,7 @@ namespace PokemonApi.Controllers
         public async Task<IActionResult> GetCategories()
         {
             IEnumerable<CategoryDTO> categories =
-                await _categoryRepository.GetCategories();
+                await _categoryRepository.GetCategoryDTOs();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -46,7 +44,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
 
             CategoryDTO category =
-                await _categoryRepository.GetCategory(categoryId);
+                await _categoryRepository.GetCategoryDTO(categoryId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -64,7 +62,7 @@ namespace PokemonApi.Controllers
                 return BadRequest();
 
             IEnumerable<PokemonDTO> pokemons =
-                await _categoryRepository.GetPokemonsByCategory(categoryId);
+                await _categoryRepository.GetPokemonDTOsByCategory(categoryId);
 
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -86,7 +84,7 @@ namespace PokemonApi.Controllers
                 return BadRequest(ModelState);
 
             CategoryDTO category =
-                await _categoryRepository.GetCategory(categoryCreate.Name);
+                await _categoryRepository.GetCategoryDTO(categoryCreate.Name);
 
             if (category != null)
             {
