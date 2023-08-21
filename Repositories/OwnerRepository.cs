@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PokemonApi.Data;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -8,73 +10,110 @@ namespace PokemonApi.Repository
     public class OwnerRepository : IOwnerRepository
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public OwnerRepository(DataContext context)
+        public OwnerRepository(DataContext context, IMapper mapper)
         {
             _context = context;
-        }
-        
-        public bool CheckExistOwner(int ownerId)
-        {
-            return _context.Owners.Any(o => o.Id == ownerId);
+            _mapper = mapper;
         }
 
-        public IEnumerable<Owner> GetOwners()
+        public async Task<bool> CheckExistOwner(int ownerId)
         {
-            return _context.Owners.ToList();
+            return await _context.Owners.AnyAsync(o => o.Id == ownerId);
         }
 
-        public IEnumerable<Owner> GetOwnersByIds(int[] ownerIds)
+        public async Task<IEnumerable<OwnerDTO>> GetOwners()
         {
-            return _context.Owners
+            IEnumerable<Owner> owners = await _context.Owners.ToListAsync();
+            IEnumerable<OwnerDTO> ownerDTOs = _mapper.Map<IEnumerable<OwnerDTO>>(owners);
+            return ownerDTOs;
+        }
+
+        public async Task<IEnumerable<OwnerDTO>> GetOwnersByIds(int[] ownerIds)
+        {
+            IEnumerable<Owner> owners = await _context.Owners
                 .Where(o => ownerIds.Contains(o.Id))
-                .ToList();
+                .ToListAsync();
+            IEnumerable<OwnerDTO> ownerDTOs =
+                _mapper.Map<IEnumerable<OwnerDTO>>(owners);
+            return ownerDTOs;
         }
 
-        public Owner GetOwner(int ownerId)
+        public async Task<OwnerDTO> GetOwner(int ownerId)
         {
-            return _context.Owners
+            Owner owner = await _context.Owners
                 .Where(o => o.Id == ownerId)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
+            OwnerDTO ownerDTO = 
+                _mapper.Map<OwnerDTO>(owner);
+            return ownerDTO;
         }
 
-        public IEnumerable<Owner> GetOwnerOfPokemon(int pokemonId)
+        public async Task<OwnerDTO> GetOwner(string ownerFirstName, string ownerLastName)
         {
-            return (ICollection<Owner>)_context.PokemonOwners
+            Owner owner = await _context.Owners
+                .Where(o => o.FirstName == ownerFirstName && o.LastName == ownerLastName)
+                .FirstOrDefaultAsync();
+            OwnerDTO ownerDTO = 
+                _mapper.Map<OwnerDTO>(owner);
+            return ownerDTO;
+        }
+
+        public async Task<OwnerDTO> GetOwnerOfPokemon(int pokemonId)
+        {
+            Owner owner = await _context.PokemonOwners
                 .Where(p => p.Pokemon.Id == pokemonId)
-                .Include(o => o.Owner)
-                .ToList();
+                .Select(o => o.Owner)
+                .FirstOrDefaultAsync();
+            OwnerDTO ownerDTO = 
+                _mapper.Map<OwnerDTO>(owner);
+            return ownerDTO;
         }
 
-        public IEnumerable<Pokemon> GetPokemonsByOwner(int ownerId)
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonsByOwner(int ownerId)
         {
-            return _context.PokemonOwners
+            IEnumerable<Pokemon> pokemons = await _context.PokemonOwners
                 .Where(p => p.Owner.Id == ownerId)
                 .Select(p => p.Pokemon)
-                .ToList();
+                .ToListAsync();
+            IEnumerable<PokemonDTO> pokemonDTOs =
+                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+            return pokemonDTOs;
         }
 
-        public bool CreateOwner(Owner owner)
+        public async Task<bool> CreateOwner(OwnerDTO owner, CountryDTO country)
         {
-            _context.Add(owner);
+            Owner ownerToCreate = _mapper.Map<Owner>(owner);
+            Country countryToCreate = _mapper.Map<Country>(country);
+
+            ownerToCreate.Country = countryToCreate;
+            await _context.AddAsync(owner);
+
             return Save();
         }
 
-        public bool UpdateOwner(Owner owner)
+        public bool UpdateOwner(OwnerDTO owner)
         {
-            _context.Update(owner);
+            Owner ownerToUpdate = _mapper.Map<Owner>(owner);
+            _context.Update(ownerToUpdate);
             return Save();
         }
 
-        public bool DeleteOwner(Owner owner)
+        public async Task<bool> DeleteOwner(int ownerId)
         {
-            _context.Remove(owner);
+            OwnerDTO owner = await GetOwner(ownerId);
+            Owner ownerToDelete = _mapper.Map<Owner>(owner);
+            _context.Remove(ownerToDelete);
             return Save();
         }
 
-        public bool DeleteOwners(IEnumerable<Owner> owners)
+        public async Task<bool> DeleteOwners(int[] ownerIds)
         {
-            foreach (Owner owner in owners)
+            IEnumerable<OwnerDTO> owners = await GetOwnersByIds(ownerIds);
+            IEnumerable<Owner> ownersToDelete = _mapper.Map<IEnumerable<Owner>>(owners);
+
+            foreach (Owner owner in ownersToDelete)
             {
                 _context.Remove(owner);
             }
@@ -83,7 +122,7 @@ namespace PokemonApi.Repository
 
         public bool Save()
         {
-            var saved = _context.SaveChanges();
+            int saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
     }

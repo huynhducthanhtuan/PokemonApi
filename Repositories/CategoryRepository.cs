@@ -1,4 +1,7 @@
-﻿using PokemonApi.Data;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -6,59 +9,83 @@ namespace PokemonApi.Repository
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private DataContext _context;
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoryRepository(DataContext context)
+        public CategoryRepository(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public bool CheckExistCategory(int categoryId)
+        public async Task<bool> CheckExistCategory(int categoryId)
         {
-            return _context.Categories.Any(c => c.Id == categoryId);
+            return await _context.Categories.AnyAsync(c => c.Id == categoryId);
         }
 
-        public IEnumerable<Category> GetCategories()
+        public async Task<IEnumerable<CategoryDTO>> GetCategories()
         {
-            return _context.Categories.ToList();
+            IEnumerable<Category> categories = await _context.Categories.ToListAsync();
+            IEnumerable<CategoryDTO> categoryDTOs = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+            return categoryDTOs;
         }
 
-        public Category GetCategory(int categoryId)
+        public async Task<CategoryDTO> GetCategory(int categoryId)
         {
-            return _context.Categories
-                .Where(e => e.Id == categoryId)
-                .FirstOrDefault();
+            Category category = await _context.Categories
+                .Where(c => c.Id == categoryId)
+                .FirstOrDefaultAsync();
+            CategoryDTO categoryDTO = 
+                _mapper.Map<CategoryDTO>(category);
+            return categoryDTO;
         }
 
-        public IEnumerable<Pokemon> GetPokemonByCategory(int categoryId)
+        public async Task<CategoryDTO> GetCategory(string categoryName)
         {
-            return _context.PokemonCategories
-                .Where(e => e.CategoryId == categoryId)
-                .Select(c => c.Pokemon)
-                .ToList();
+            Category category = await _context.Categories
+                .Where(c => c.Name == categoryName)
+                .FirstOrDefaultAsync();
+            CategoryDTO categoryDTO = 
+                _mapper.Map<CategoryDTO>(category);
+            return categoryDTO;
         }
 
-        public bool CreateCategory(Category category)
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonsByCategory(int categoryId)
         {
-            _context.Add(category);
+            IEnumerable<Pokemon> pokemons = await _context.PokemonCategories
+                .Where(pc => pc.CategoryId == categoryId)
+                .Select(pc => pc.Pokemon)
+                .ToListAsync();
+            IEnumerable<PokemonDTO> pokemonDTOs = 
+                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+            return pokemonDTOs;
+        }
+
+        public bool CreateCategory(CategoryDTO category)
+        {
+            Category categoryToCreate = _mapper.Map<Category>(category);
+            _context.Add(categoryToCreate);
             return Save();
         }
 
-        public bool UpdateCategory(Category category)
+        public bool UpdateCategory(CategoryDTO category)
         {
-            _context.Update(category);
+            Category categoryToUpdate = _mapper.Map<Category>(category);
+            _context.Update(categoryToUpdate);
             return Save();
         }
 
-        public bool DeleteCategory(Category category)
+        public async Task<bool> DeleteCategory(int categoryId)
         {
-            _context.Remove(category);
+            CategoryDTO category = await GetCategory(categoryId);
+            Category categoryToDelete = _mapper.Map<Category>(category);
+            _context.Remove(categoryToDelete);
             return Save();
         }
-        
+
         public bool Save()
         {
-            var saved = _context.SaveChanges();
+            int saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
     }

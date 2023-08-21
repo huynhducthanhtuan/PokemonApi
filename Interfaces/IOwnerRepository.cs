@@ -1,19 +1,20 @@
-﻿using PokemonApi.Models;
+﻿using PokemonApi.DTOs;
 
 namespace PokemonApi.Interfaces
 {
     public interface IOwnerRepository
     {
-        bool CheckExistOwner(int ownerId);
-        IEnumerable<Owner> GetOwners();
-        IEnumerable<Owner> GetOwnersByIds(int[] ownerIds);
-        Owner GetOwner(int ownerId);
-        IEnumerable<Owner> GetOwnerOfPokemon(int pokemonId);
-        IEnumerable<Pokemon> GetPokemonsByOwner(int ownerId);
-        bool CreateOwner(Owner owner);
-        bool UpdateOwner(Owner owner);
-        bool DeleteOwner(Owner owner);
-        bool DeleteOwners(IEnumerable<Owner> owners);
+        Task<bool> CheckExistOwner(int ownerId);
+        Task<IEnumerable<OwnerDTO>> GetOwners();
+        Task<IEnumerable<OwnerDTO>> GetOwnersByIds(int[] ownerIds);
+        Task<OwnerDTO> GetOwner(int ownerId);
+        Task<OwnerDTO> GetOwner(string ownerFirstName, string ownerLastName);
+        Task<OwnerDTO> GetOwnerOfPokemon(int pokemonId);
+        Task<IEnumerable<PokemonDTO>> GetPokemonsByOwner(int ownerId);
+        Task<bool> CreateOwner(OwnerDTO owner, CountryDTO country);
+        bool UpdateOwner(OwnerDTO owner);
+        Task<bool> DeleteOwner(int ownerId);
+        Task<bool> DeleteOwners(int[] ownerIds);
         bool Save();
     }
 }

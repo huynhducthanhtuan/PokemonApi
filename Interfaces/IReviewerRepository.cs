@@ -1,18 +1,19 @@
-﻿using PokemonApi.Models;
+﻿using PokemonApi.DTOs;
 
 namespace PokemonApi.Interfaces
 {
     public interface IReviewerRepository
     {
-        bool CheckExistReviewer(int reviewerId);
-        IEnumerable<Reviewer> GetReviewers();
-        IEnumerable<Reviewer> GetReviewersByIds(int[] reviewerIds);
-        Reviewer GetReviewer(int reviewerId);
-        IEnumerable<Review> GetReviewsOfReviewer(int reviewerId);
-        bool CreateReviewer(Reviewer reviewer);
-        bool UpdateReviewer(Reviewer reviewer);
-        bool DeleteReviewer(Reviewer reviewer);
-        bool DeleteReviewers(IEnumerable<Reviewer> reviewers);
+        Task<bool> CheckExistReviewer(int reviewerId);
+        Task<bool> CheckExistReviewer(string reviewerFirstName, string reviewerLastName);
+        Task<IEnumerable<ReviewerDTO>> GetReviewers();
+        Task<IEnumerable<ReviewerDTO>> GetReviewersByIds(int[] reviewerIds);
+        Task<ReviewerDTO> GetReviewer(int reviewerId);
+        Task<IEnumerable<ReviewDTO>> GetReviewsOfReviewer(int reviewerId);
+        Task<bool> CreateReviewer(ReviewerDTO reviewer);
+        bool UpdateReviewer(ReviewerDTO reviewer);
+        Task<bool> DeleteReviewer(int reviewerId);
+        Task<bool> DeleteReviewers(int[] reviewerIds);
         bool Save();
     }
 }

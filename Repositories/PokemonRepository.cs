@@ -1,4 +1,6 @@
-﻿using PokemonApi.Data;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
@@ -8,104 +10,130 @@ namespace PokemonApi.Repository
     public class PokemonRepository : IPokemonRepository
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public PokemonRepository(DataContext context)
+        public PokemonRepository(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public bool CheckExistPokemon(int pokemonId)
+        public async Task<bool> CheckExistPokemon(int pokemonId)
         {
-            return _context.Pokemons.Any(p => p.Id == pokemonId);
+            return await _context.Pokemons.AnyAsync(p => p.Id == pokemonId);
         }
 
-        public bool CheckExistPokemon(string pokemonName)
+        public async Task<bool> CheckExistPokemon(string pokemonName)
         {
-            return _context.Pokemons.Any(p => p.Name == pokemonName);
+            return await _context.Pokemons.AnyAsync(p => p.Name == pokemonName);
         }
 
-        public IEnumerable<Pokemon> GetPokemons()
+        public async Task<IEnumerable<PokemonDTO>> GetPokemons()
         {
-            return _context.Pokemons.OrderBy(p => p.Id).ToList();
+            IEnumerable<Pokemon> pokemons =
+                await _context.Pokemons.OrderBy(p => p.Id).ToListAsync();
+            IEnumerable<PokemonDTO> pokemonDTOs =
+                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+            return pokemonDTOs;
         }
 
-        public IEnumerable<Pokemon> GetPokemonsByIds(int[] pokemonIds)
+        public async Task<IEnumerable<PokemonDTO>> GetPokemonsByIds(int[] pokemonIds)
         {
-            return _context.Pokemons
+            IEnumerable<Pokemon> pokemons = await _context.Pokemons
                 .Where(o => pokemonIds.Contains(o.Id))
-                .ToList();
+                .ToListAsync();
+            IEnumerable<PokemonDTO> pokemonDTOs =
+                _mapper.Map<IEnumerable<PokemonDTO>>(pokemons);
+            return pokemonDTOs;
         }
 
-        public Pokemon GetPokemon(int id)
+        public async Task<PokemonDTO> GetPokemon(int pokemonId)
         {
-            return _context.Pokemons.FirstOrDefault(p => p.Id == id);
+            Pokemon pokemon =
+                await _context.Pokemons.FirstOrDefaultAsync(p => p.Id == pokemonId);
+            PokemonDTO pokemonDTO =
+                _mapper.Map<PokemonDTO>(pokemon);
+            return pokemonDTO;
         }
 
-        public Pokemon GetPokemon(string name)
+        public async Task<PokemonDTO> GetPokemon(string pokemonName)
         {
-            return _context.Pokemons.FirstOrDefault(p => p.Name == name);
+            Pokemon pokemon =
+                await _context.Pokemons.FirstOrDefaultAsync(p => p.Name == pokemonName);
+            PokemonDTO pokemonDTO =
+                _mapper.Map<PokemonDTO>(pokemon);
+            return pokemonDTO;
         }
 
-        public double GetPokemonRating(int pokemonId)
+        public async Task<double> GetPokemonRatingPoint(int pokemonId)
         {
-            var reviews = _context.Reviews
+            IEnumerable<Review> reviewsOfPokemon = await _context.Reviews
                 .Where(r => r.Pokemon.Id == pokemonId)
-                .ToList();
+                .ToListAsync();
 
-            if (reviews.Count() <= 0)
+            int sumOfRating = reviewsOfPokemon.Sum(p => p.Rating);
+            int countOfRating = reviewsOfPokemon.Count();
+
+            if (sumOfRating <= 0)
                 return 0;
 
-            return reviews.Sum(p => p.Rating) / reviews.Count();
+            double ratingPoint = sumOfRating / countOfRating;
+            return ratingPoint;
         }
 
-        public Pokemon GetPokemonTrimToUpper(PokemonDTO pokemonCreate)
+        public async Task<bool> CreatePokemon(
+            int ownerId, 
+            int categoryId, 
+            PokemonDTO pokemonCreate
+        )
         {
-            return GetPokemons()
-                .Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper())
-                .FirstOrDefault();
-        }
+            Owner owner = await _context.Owners
+                        .Where(a => a.Id == ownerId).FirstOrDefaultAsync();
+            Category category = await _context.Categories
+                        .Where(a => a.Id == categoryId).FirstOrDefaultAsync();
+            Pokemon pokemon = _mapper.Map<Pokemon>(pokemonCreate);    
 
-        public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
-        {
-            var pokemonOwnerEntity = _context.Owners
-                        .Where(a => a.Id == ownerId).FirstOrDefault();
-            var category = _context.Categories
-                        .Where(a => a.Id == categoryId).FirstOrDefault();
-
-            var pokemonOwner = new PokemonOwner()
+            PokemonOwner pokemonOwner = new PokemonOwner()
             {
-                Owner = pokemonOwnerEntity,
+                Owner = owner,
                 Pokemon = pokemon,
             };
-            _context.Add(pokemonOwner);
+            await _context.AddAsync(pokemonOwner);
 
-            var pokemonCategory = new PokemonCategory()
+            PokemonCategory pokemonCategory = new PokemonCategory()
             {
                 Category = category,
                 Pokemon = pokemon,
             };
-            _context.Add(pokemonCategory);
+            await _context.AddAsync(pokemonCategory);
 
-            _context.Add(pokemon);
+            await _context.AddAsync(pokemonCreate);
 
             return Save();
         }
 
-        public bool UpdatePokemon(int ownerId, int categoryId, Pokemon pokemon)
+        public bool UpdatePokemon(PokemonDTO pokemon)
         {
-            _context.Update(pokemon);
+            Pokemon pokemonToUpdate = _mapper.Map<Pokemon>(pokemon);
+            _context.Update(pokemonToUpdate);
             return Save();
         }
 
-        public bool DeletePokemon(Pokemon pokemon)
+        public async Task<bool> DeletePokemon(int pokemonId)
         {
-            _context.Remove(pokemon);
+            PokemonDTO reviews = await GetPokemon(pokemonId);
+            Pokemon pokemonToDelete = _mapper.Map<Pokemon>(reviews);
+
+            _context.Remove(pokemonToDelete);
             return Save();
         }
 
-        public bool DeletePokemons(IEnumerable<Pokemon> pokemons)
+        public async Task<bool> DeletePokemons(int[] pokemonIds)
         {
-            foreach (Pokemon pokemon in pokemons)
+            IEnumerable<PokemonDTO> pokemons = await GetPokemonsByIds(pokemonIds);
+            IEnumerable<Pokemon> pokemonsToDelete = _mapper.Map<IEnumerable<Pokemon>>(pokemons);
+
+            foreach (Pokemon pokemon in pokemonsToDelete)
             {
                 _context.Remove(pokemon);
             }
@@ -114,7 +142,7 @@ namespace PokemonApi.Repository
 
         public bool Save()
         {
-            var saved = _context.SaveChanges();
+            int saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
     }

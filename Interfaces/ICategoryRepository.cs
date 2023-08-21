@@ -1,17 +1,17 @@
-﻿using PokemonApi.Models;
+﻿using PokemonApi.DTOs;
 
 namespace PokemonApi.Interfaces
 {
     public interface ICategoryRepository
     {
-        bool CheckExistCategory(int categoryId);
-        IEnumerable<Category> GetCategories();
-        Category GetCategory(int categoryId);
-        IEnumerable<Pokemon> GetPokemonByCategory(int categoryId);
-        bool CreateCategory(Category category);
-        bool UpdateCategory(Category category);
-        bool DeleteCategory(Category category);        
-        //bool DeleteCategories(List<Category> categories);
+        Task<bool> CheckExistCategory(int categoryId);
+        Task<IEnumerable<CategoryDTO>> GetCategories();
+        Task<CategoryDTO> GetCategory(int categoryId);
+        Task<CategoryDTO> GetCategory(string categoryName);
+        Task<IEnumerable<PokemonDTO>> GetPokemonsByCategory(int categoryId);
+        bool CreateCategory(CategoryDTO category);
+        bool UpdateCategory(CategoryDTO category);
+        Task<bool> DeleteCategory(int categoryId);
         bool Save();
     }
 }

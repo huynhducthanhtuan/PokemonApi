@@ -1,4 +1,7 @@
-﻿using PokemonApi.Data;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -7,64 +10,133 @@ namespace PokemonApi.Repository
     public class ReviewRepository : IReviewRepository
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        private readonly IPokemonRepository _pokemonRepository;
+        private readonly IReviewerRepository _reviewerRepository;
 
-        public ReviewRepository(DataContext context)
+        public ReviewRepository(
+            DataContext context, 
+            IMapper mapper,
+            IPokemonRepository pokemonRepository,
+            IReviewerRepository reviewerRepository
+        )
         {
             _context = context;
+            _mapper = mapper;
+            _pokemonRepository = pokemonRepository;
+            _reviewerRepository = reviewerRepository;
         }
 
-        public bool CheckExistReview(int reviewId)
+        public async Task<bool> CheckExistReview(int reviewId)
         {
-            return _context.Reviews.Any(r => r.Id == reviewId);
+            return await _context.Reviews.AnyAsync(r => r.Id == reviewId);
         }
 
-        public IEnumerable<Review> GetReviews()
+        public async Task<bool> CheckExistReview(string reviewTitle)
         {
-            return _context.Reviews.ToList();
+            return await _context.Reviews.AnyAsync(r => r.Title == reviewTitle);
         }
 
-        public IEnumerable<Review> GetReviewsByIds(int[] reviewIds)
+        public async Task<IEnumerable<ReviewDTO>> GetReviews()
         {
-            return _context.Reviews
+            IEnumerable<Review> reviews = await _context.Reviews.ToListAsync();
+            IEnumerable<ReviewDTO> reviewDTOs = _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
+            return reviewDTOs;
+        }
+
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsByIds(int[] reviewIds)
+        {
+            IEnumerable<Review> reviews = await _context.Reviews
                 .Where(r => reviewIds.Contains(r.Id))
-                .ToList();
+                .ToListAsync();
+            IEnumerable<ReviewDTO> reviewDTOs = 
+                _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
+            return reviewDTOs;
         }
 
-        public IEnumerable<Review> GetReviewsOfPokemon(int pokemonId)
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsOfPokemon(int pokemonId)
         {
-            return _context.Reviews
+            IEnumerable<Review> reviews = await _context.Reviews
                 .Where(r => r.Pokemon.Id == pokemonId)
-                .ToList();
+                .ToListAsync();
+            IEnumerable<ReviewDTO> reviewDTOs =
+                _mapper.Map<IEnumerable<ReviewDTO>>(reviews);
+            return reviewDTOs;
         }
 
-        public Review GetReview(int reviewId)
+        public async Task<ReviewDTO> GetReview(int reviewId)
         {
-            return _context.Reviews
+            Review review = await _context.Reviews
                 .Where(r => r.Id == reviewId)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
+            ReviewDTO reviewDTO = _mapper.Map<ReviewDTO>(review);
+            return reviewDTO;
         }
 
-        public bool CreateReview(Review review)
+        public async Task<bool> CreateReview(
+            int reviewerId,
+            int pokemonId,
+            ReviewDTO review
+        )
         {
-            _context.Add(review);
+            Review reviewToCreate = _mapper.Map<Review>(review);
+            reviewToCreate.Pokemon = 
+                _mapper.Map<Pokemon>(await _pokemonRepository.GetPokemon(pokemonId));
+            reviewToCreate.Reviewer =
+                _mapper.Map<Reviewer>(await _reviewerRepository.GetReviewer(reviewerId));
+
+            await _context.AddAsync(reviewToCreate);
             return Save();
         }
 
-        public bool UpdateReview(Review review)
+        public bool UpdateReview(ReviewDTO review)
         {
-            _context.Update(review);
+            Review reviewToUpdate = _mapper.Map<Review>(review);
+            _context.Update(reviewToUpdate);
             return Save();
         }
 
-        public bool DeleteReview(Review review)
+        public async Task<bool> DeleteReview(int reviewId)
         {
-            _context.Remove(review);
+            ReviewDTO review = await GetReview(reviewId);
+            Review reviewToDelete = _mapper.Map<Review>(review);
+            _context.Remove(reviewToDelete);
             return Save();
         }
 
-        public bool DeleteReviews(IEnumerable<Review> reviews)
+        public async Task<bool> DeleteReviews(int[] reviewIds)
         {
-            foreach (Review review in reviews)
+            IEnumerable<ReviewDTO> reviews = await GetReviewsByIds(reviewIds);
+            IEnumerable<Review> reviewsToDelete = 
+                _mapper.Map<IEnumerable<Review>>(reviews);
+
+            foreach (Review review in reviewsToDelete)
+            {
+                _context.Remove(review);
+            }
+            return Save();
+        }
+
+        public async Task<bool> DeleteReviewsOfPokemon(int pokemonId)
+        {
+            IEnumerable<Review> reviewsToDelete = await _context.Reviews
+                .Where(r => r.Pokemon.Id == pokemonId)
+                .ToListAsync();
+
+            foreach (Review review in reviewsToDelete)
+            {
+                _context.Remove(review);
+            }
+            return Save();
+        }
+
+        public async Task<bool> DeleteReviewsOfReviewer(int reviewerId)
+        {
+            IEnumerable<Review> reviewsToDelete = await _context.Reviews
+                .Where(r => r.Reviewer.Id == reviewerId)
+                .ToListAsync();
+
+            foreach (Review review in reviewsToDelete)
             {
                 _context.Remove(review);
             }
@@ -73,7 +145,7 @@ namespace PokemonApi.Repository
 
         public bool Save()
         {
-            var saved = _context.SaveChanges();
+            int saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
     }

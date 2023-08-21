@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
-using PokemonApi.Models;
 
 namespace PokemonApi.Controllers
 {
@@ -12,30 +10,23 @@ namespace PokemonApi.Controllers
     {
         private readonly IReviewRepository _reviewRepository;
         private readonly IReviewerRepository _reviewerRepository;
-        private readonly IPokemonRepository _pokemonRepository;
-        private readonly IMapper _mapper;
 
         public ReviewController(
             IReviewRepository reviewRepository,
-            IPokemonRepository pokemonRepository,
-            IReviewerRepository reviewerRepository,
-            IMapper mapper
+            IReviewerRepository reviewerRepository
         )
         {
             _reviewRepository = reviewRepository;
             _reviewerRepository = reviewerRepository;
-            _pokemonRepository = pokemonRepository;
-            _mapper = mapper;
         }
 
         ///<summary>Get List Of Reviews</summary>
         [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewDTO>))]
         [ProducesResponseType(400)]
-        public IActionResult GetReviews()
+        public async Task<IActionResult> GetReviews()
         {
-            IEnumerable<ReviewDTO> reviews =
-                _mapper.Map<IEnumerable<ReviewDTO>>(_reviewRepository.GetReviews());
+            IEnumerable<ReviewDTO> reviews = await _reviewRepository.GetReviews();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,10 +39,13 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult GetReviewsByIds(int[] reviewIds)
+        public async Task<IActionResult> GetReviewsByIds(int[] reviewIds)
         {
-            IEnumerable<ReviewDTO> reviews =
-                _mapper.Map<IEnumerable<ReviewDTO>>(_reviewRepository.GetReviewsByIds(reviewIds));
+            if (reviewIds == null || reviewIds.Length == 0)
+                return BadRequest(ModelState);
+
+            IEnumerable<ReviewDTO> reviews = 
+                await _reviewRepository.GetReviewsByIds(reviewIds);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -64,13 +58,15 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(ReviewDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult GetReview(int reviewId)
+        public async Task<IActionResult> GetReview(int reviewId)
         {
-            if (!_reviewRepository.CheckExistReview(reviewId))
+            if (reviewId == null)
+                return BadRequest(ModelState);
+
+            if (!await _reviewRepository.CheckExistReview(reviewId))
                 return NotFound();
 
-            ReviewDTO review =
-                _mapper.Map<ReviewDTO>(_reviewRepository.GetReview(reviewId));
+            ReviewDTO review = await _reviewRepository.GetReview(reviewId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -82,10 +78,13 @@ namespace PokemonApi.Controllers
         [HttpGet("pokemon/{pokemonId}")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewDTO>))]
         [ProducesResponseType(400)]
-        public IActionResult GetReviewsOfPokemon(int pokemonId)
+        public async Task<IActionResult> GetReviewsOfPokemon(int pokemonId)
         {
+            if (pokemonId == null)
+                return BadRequest(ModelState);
+
             IEnumerable<ReviewDTO> reviews =
-                _mapper.Map<IEnumerable<ReviewDTO>>(_reviewRepository.GetReviewsOfPokemon(pokemonId));
+                await _reviewRepository.GetReviewsOfPokemon(pokemonId);
 
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -99,20 +98,19 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(422)]
         [ProducesResponseType(500)]
-        public IActionResult CreateReview(
+        public async Task<IActionResult> CreateReview(
             [FromQuery] int reviewerId,
             [FromQuery] int pokemonId,
             [FromBody] ReviewDTO reviewCreate
         )
         {
+            if (reviewerId == null || pokemonId == null || reviewCreate == null)
+                return BadRequest(ModelState);
+
             if (reviewCreate == null)
                 return BadRequest(ModelState);
 
-            Review review = _reviewRepository.GetReviews()
-                .Where(c => c.Title.Trim().ToUpper() == reviewCreate.Title.TrimEnd().ToUpper())
-                .FirstOrDefault();
-
-            if (review != null)
+            if (await _reviewRepository.CheckExistReview(reviewCreate.Title))
             {
                 ModelState.AddModelError("", "Review already exists");
                 return StatusCode(422, ModelState);
@@ -121,13 +119,9 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            Review reviewMap = _mapper.Map<Review>(reviewCreate);
-            reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokemonId);
-            reviewMap.Reviewer = _reviewerRepository.GetReviewer(reviewerId);
-
-            if (!_reviewRepository.CreateReview(reviewMap))
+            if (!await _reviewRepository.CreateReview(reviewerId, pokemonId, reviewCreate))
             {
-                ModelState.AddModelError("", "Something went wrong while savin");
+                ModelState.AddModelError("", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
@@ -140,23 +134,23 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateReview(int reviewId, [FromBody] ReviewDTO updateReview)
+        public async Task<IActionResult> UpdateReview(
+            int reviewId, 
+            [FromBody] ReviewDTO updateReview)
         {
-            if (updateReview == null)
+            if (reviewId == null || updateReview == null)
                 return BadRequest(ModelState);
 
             if (reviewId != updateReview.Id)
                 return BadRequest(ModelState);
 
-            if (!_reviewRepository.CheckExistReview(reviewId))
+            if (!await _reviewRepository.CheckExistReview(reviewId))
                 return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            Review reviewMap = _mapper.Map<Review>(updateReview);
-
-            if (!_reviewRepository.UpdateReview(reviewMap))
+            if (!_reviewRepository.UpdateReview(updateReview))
             {
                 ModelState.AddModelError("", "Something went wrong when updating review");
                 return StatusCode(500, ModelState);
@@ -170,17 +164,18 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteReview(int reviewId)
+        public async Task<IActionResult> DeleteReview(int reviewId)
         {
-            if (!_reviewRepository.CheckExistReview(reviewId))
-                return NotFound();
+            if (reviewId == null)
+                return BadRequest(ModelState);
 
-            Review reviewToDelete = _reviewRepository.GetReview(reviewId);
+            if (!await _reviewRepository.CheckExistReview(reviewId))
+                return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_reviewRepository.DeleteReview(reviewToDelete))
+            if (!await _reviewRepository.DeleteReview(reviewId))
             {
                 ModelState.AddModelError("", "Something went wrong when deleting owner");
                 return BadRequest(ModelState);
@@ -195,19 +190,20 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult DeleteReviewsOfReviewer(int reviewerId)
+        public async Task<IActionResult> DeleteReviewsOfReviewer(int reviewerId)
         {
-            if (!_reviewerRepository.CheckExistReviewer(reviewerId))
-                return NotFound();
+            if (reviewerId == null)
+                return BadRequest();
 
-            IEnumerable<Review> reviewsToDelete = _reviewerRepository.GetReviewsOfReviewer(reviewerId);
+            if (!await _reviewerRepository.CheckExistReviewer(reviewerId))
+                return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            if (!_reviewRepository.DeleteReviews(reviewsToDelete))
+            if (!await _reviewRepository.DeleteReviewsOfReviewer(reviewerId))
             {
-                ModelState.AddModelError("", "error deleting reviews");
+                ModelState.AddModelError("", "Error when deleting reviews");
                 return StatusCode(500, ModelState);
             }
 
@@ -220,16 +216,14 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult DeleteReviewsByIds(int[] reviewIds)
+        public async Task<IActionResult> DeleteReviewsByIds(int[] reviewIds)
         {
-            IEnumerable<Review> reviews = _reviewRepository.GetReviewsByIds(reviewIds);
-
-            if (!ModelState.IsValid)
+            if (reviewIds == null || reviewIds.Length == 0)
                 return BadRequest();
 
-            if (!_reviewRepository.DeleteReviews(reviews))
+            if (!await _reviewRepository.DeleteReviews(reviewIds))
             {
-                ModelState.AddModelError("", "error deleting reviews");
+                ModelState.AddModelError("", "Error when deleting reviews");
                 return StatusCode(500, ModelState);
             }
 

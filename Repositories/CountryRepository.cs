@@ -1,4 +1,7 @@
-﻿using PokemonApi.Data;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
+using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 using PokemonApi.Models;
 
@@ -7,65 +10,88 @@ namespace PokemonApi.Repository
     public class CountryRepository : ICountryRepository
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public CountryRepository(DataContext context)
+        public CountryRepository(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public bool CheckExistCountry(int countryId)
+        public async Task<bool> CheckExistCountry(int countryId)
         {
-            return _context.Countries.Any(c => c.Id == countryId);
+            return await _context.Countries.AnyAsync(c => c.Id == countryId);
         }
 
-        public IEnumerable<Country> GetCountries()
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
         {
-            return _context.Countries.ToList();
+            IEnumerable<Country> countries = await _context.Countries.ToListAsync();
+            IEnumerable<CountryDTO> countryDTOs = _mapper.Map<IEnumerable<CountryDTO>>(countries);
+            return countryDTOs;
         }
 
-        public Country GetCountry(int countryId)
+        public async Task<CountryDTO> GetCountry(int countryId)
         {
-            return _context.Countries
+            Country country = await _context.Countries
                 .Where(c => c.Id == countryId)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
+            CountryDTO countryDTO = _mapper.Map<CountryDTO>(country);
+            return countryDTO;
         }
 
-        public Country GetCountryByOwner(int ownerId)
+        public async Task<CountryDTO> GetCountry(string countryName)
         {
-            return _context.Owners
+            Country country = await _context.Countries
+                .Where(c => c.Name == countryName)
+                .FirstOrDefaultAsync();
+            CountryDTO countryDTO = _mapper.Map<CountryDTO>(country);
+            return countryDTO;
+        }
+
+        public async Task<CountryDTO> GetCountryByOwner(int ownerId)
+        {
+            Country country = await _context.Owners
                 .Where(o => o.Id == ownerId)
-                .Select(c => c.Country)
-                .FirstOrDefault();
+                .Select(o => o.Country)
+                .FirstOrDefaultAsync();
+            CountryDTO countryDTO = _mapper.Map<CountryDTO>(country);
+            return countryDTO;
         }
 
-        public IEnumerable<Owner> GetOwnersFromACountry(int countryId)
+        public async Task<IEnumerable<OwnerDTO>> GetOwnersFromCountry(int countryId)
         {
-            return _context.Owners
+            IEnumerable<Owner> owners = await _context.Owners
                 .Where(c => c.Country.Id == countryId)
-                .ToList();
+                .ToListAsync();
+            IEnumerable<OwnerDTO> ownerDTOs = _mapper.Map<IEnumerable<OwnerDTO>>(owners);
+            return ownerDTOs;
         }
 
-        public bool CreateCountry(Country country)
+        public bool CreateCountry(CountryDTO country)
         {
-            _context.Add(country);
+            Country countryToCreate = _mapper.Map<Country>(country);
+            _context.Add(countryToCreate);
             return Save();
         }
 
-        public bool UpdateCountry(Country country)
+        public bool UpdateCountry(CountryDTO country)
         {
-            _context.Update(country);
+            Country countryToUpdate = _mapper.Map<Country>(country);
+            _context.Update(countryToUpdate);
             return Save();
         }
 
-        public bool DeleteCountry(Country country)
+        public async Task<bool> DeleteCountry(int countryId)
         {
-            _context.Remove(country);
+            CountryDTO country = await GetCountry(countryId);
+            Country countryToDelete = _mapper.Map<Country>(country);
+            _context.Remove(countryToDelete);
             return Save();
         }
 
         public bool Save()
         {
-            var saved = _context.SaveChanges();
+            int saved = _context.SaveChanges();
             return saved > 0 ? true : false;
         }
     }

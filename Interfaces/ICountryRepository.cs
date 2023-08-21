@@ -1,18 +1,18 @@
-﻿using PokemonApi.Models;
+﻿using PokemonApi.DTOs;
 
 namespace PokemonApi.Interfaces
 {
     public interface ICountryRepository
     {
-        bool CheckExistCountry(int countryId);
-        IEnumerable<Country> GetCountries();
-        Country GetCountry(int countryId);
-        Country GetCountryByOwner(int ownerId);
-        IEnumerable<Owner> GetOwnersFromACountry(int countryId);
-        bool CreateCountry(Country country);
-        bool UpdateCountry(Country country);
-        bool DeleteCountry(Country Country);
-        //bool DeleteCountries(List<Country> countries);
+        Task<bool> CheckExistCountry(int countryId);
+        Task<IEnumerable<CountryDTO>> GetCountries();
+        Task<CountryDTO> GetCountry(int countryId);
+        Task<CountryDTO> GetCountry(string countryName);
+        Task<CountryDTO> GetCountryByOwner(int ownerId);
+        Task<IEnumerable<OwnerDTO>> GetOwnersFromCountry(int countryId);
+        bool CreateCountry(CountryDTO country);
+        bool UpdateCountry(CountryDTO country);
+        Task<bool> DeleteCountry(int countryId);
         bool Save();
     }
 }
