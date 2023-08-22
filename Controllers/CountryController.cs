@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 
@@ -19,6 +20,7 @@ namespace PokemonApi.Controllers
         [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<CountryDTO>))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetCountries()
         {
             IEnumerable<CountryDTO> countries = 
@@ -35,6 +37,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(CountryDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetCountry(int countryId)
         {
             if (countryId == null)
@@ -56,6 +59,7 @@ namespace PokemonApi.Controllers
         [HttpGet("owners/{ownerId}")]
         [ProducesResponseType(200, Type = typeof(CountryDTO))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetCountryOfOwner(int ownerId)
         {
             if (ownerId == null)
@@ -74,8 +78,9 @@ namespace PokemonApi.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> CreateCountry(
             [FromBody] CountryDTO countryCreate
         )
@@ -88,8 +93,8 @@ namespace PokemonApi.Controllers
 
             if (country != null)
             {
-                ModelState.AddModelError("", "Country already exists");
-                return StatusCode(422, ModelState);
+                ModelState.AddModelError("error", "Country already exists");
+                return Conflict(ModelState);
             }
 
             if (!ModelState.IsValid)
@@ -97,20 +102,21 @@ namespace PokemonApi.Controllers
 
             if (!_countryRepository.CreateCountry(countryCreate))
             {
-                ModelState.AddModelError("", "Something went wrong while saving");
+                ModelState.AddModelError("error", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return CreatedAtAction("GetCountry", new { countryId = countryCreate.Id });
         }
 
-        ///<summary>Update Category</summary>
+        ///<summary>Update Country</summary>
         [HttpPut("{countryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateCategory(
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> UpdateCountry(
             int countryId, 
             [FromBody] CountryDTO updateCountry
         )
@@ -129,7 +135,7 @@ namespace PokemonApi.Controllers
 
             if (!_countryRepository.UpdateCountry(updateCountry))
             {
-                ModelState.AddModelError("", "Something went wrong when updating category");
+                ModelState.AddModelError("error", "Something went wrong when updating category");
                 return StatusCode(500, ModelState);
             }
 
@@ -141,6 +147,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeleteCountry(int countryId)
         {
             if (countryId == null)
@@ -151,7 +159,7 @@ namespace PokemonApi.Controllers
 
             if (!await _countryRepository.DeleteCountry(countryId))
             {
-                ModelState.AddModelError("", "Something went wrong when deleting country");
+                ModelState.AddModelError("error", "Something went wrong when deleting country");
                 return BadRequest(ModelState);
             }
 

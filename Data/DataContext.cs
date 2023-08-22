@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PokemonApi.Models;
 
 namespace PokemonApi.Data
@@ -15,6 +16,14 @@ namespace PokemonApi.Data
         public DbSet<PokemonCategory> PokemonCategories { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Reviewer> Reviewers { get; set; }
+
+        public DbSet<AppUser> AspNetUsers { get; set; }
+        public DbSet<IdentityRole<string>> AspNetRoles { get; set; }
+        //public DbSet<IdentityRoleClaim<string>> AspNetRoleClaims { get; set; }
+        //public DbSet<IdentityUserClaim<string>> AspNetUserClaims { get; set; }
+        //public DbSet<IdentityUserLogin<string>> AspNetUserLogins { get; set; }
+        //public DbSet<IdentityUserRole<string>> AspNetUserRoles { get; set; }
+        //public DbSet<IdentityUserToken<string>> AspNetUserTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

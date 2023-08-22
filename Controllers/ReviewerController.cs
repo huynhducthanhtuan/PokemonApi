@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 
@@ -19,6 +20,8 @@ namespace PokemonApi.Controllers
         [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewerDTO>))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> GetReviewers()
         {
             IEnumerable<ReviewerDTO> reviewers =
@@ -35,6 +38,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewerDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> GetReviewersByIds(int[] reviewerIds)
         {
             if (reviewerIds == null || reviewerIds.Length == 0)
@@ -54,6 +58,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(ReviewerDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemon(int reviewerId)
         {
             if (reviewerId == null)
@@ -76,6 +81,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetReviewsOfReviewer(int reviewerId)
         {
             if (reviewerId == null)
@@ -97,8 +103,9 @@ namespace PokemonApi.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "ReviewerPolicy,AdminPolicy")]
         public async Task<IActionResult> CreateReviewer(
             [FromBody] ReviewerDTO reviewerCreate
         )
@@ -113,8 +120,8 @@ namespace PokemonApi.Controllers
 
             if (isExistReviewer == true)
             {
-                ModelState.AddModelError("", "Reviewer already exists");
-                return StatusCode(422, ModelState);
+                ModelState.AddModelError("error", "Reviewer already exists");
+                return Conflict(ModelState);
             }
 
             if (!ModelState.IsValid)
@@ -122,11 +129,11 @@ namespace PokemonApi.Controllers
 
             if (!await _reviewerRepository.CreateReviewer(reviewerCreate))
             {
-                ModelState.AddModelError("", "Something went wrong while saving");
+                ModelState.AddModelError("error", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return CreatedAtAction("GetReviewer", new { reviewerId = reviewerCreate.Id });
         }
 
         ///<summary>Update Reviewer</summary>
@@ -135,6 +142,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "ReviewerPolicy,AdminPolicy")]
         public async Task<IActionResult> UpdateReviewer(
             int reviewerId, 
             [FromBody] ReviewerDTO updateReviewer
@@ -154,7 +162,7 @@ namespace PokemonApi.Controllers
 
             if (!_reviewerRepository.UpdateReviewer(updateReviewer))
             {
-                ModelState.AddModelError("", "Something went wrong when updating reviewer");
+                ModelState.AddModelError("error", "Something went wrong when updating reviewer");
                 return StatusCode(500, ModelState);
             }
 
@@ -166,6 +174,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeleteReviewer(int reviewerId)
         {
             if (reviewerId == null)
@@ -179,7 +189,7 @@ namespace PokemonApi.Controllers
 
             if (!await _reviewerRepository.CheckExistReviewer(reviewerId))
             {
-                ModelState.AddModelError("", "Something went wrong when deleting reviewer");
+                ModelState.AddModelError("error", "Something went wrong when deleting reviewer");
                 return BadRequest(ModelState);
             }
 
@@ -192,6 +202,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeleteReviewersByIds(int[] reviewerIds)
         {
             if (reviewerIds == null || reviewerIds.Length == 0)
@@ -199,7 +210,7 @@ namespace PokemonApi.Controllers
 
             if (!await _reviewerRepository.DeleteReviewers(reviewerIds))
             {
-                ModelState.AddModelError("", "Error when deleting reviewers");
+                ModelState.AddModelError("error", "Error when deleting reviewers");
                 return StatusCode(500, ModelState);
             }
 

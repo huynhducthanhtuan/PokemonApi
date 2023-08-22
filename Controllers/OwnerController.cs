@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 
@@ -24,6 +25,8 @@ namespace PokemonApi.Controllers
         [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<OwnerDTO>))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> GetOwners()
         {
             IEnumerable<OwnerDTO> owners = 
@@ -40,6 +43,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<OwnerDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> GetOwnersByIds(int[] ownerIds)
         {
             if (ownerIds == null || ownerIds.Length == 0)
@@ -59,6 +63,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(OwnerDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetOwner(int ownerId)
         {
             if (ownerId == null)
@@ -81,6 +86,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<PokemonDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemonsByOwner(int ownerId)
         {
             if (ownerId == null)
@@ -102,8 +108,9 @@ namespace PokemonApi.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "OwnerPolicy,AdminPolicy")]
         public async Task<IActionResult> CreateOwner(
             [FromQuery] int countryId,
             [FromBody] OwnerDTO ownerCreate
@@ -119,8 +126,8 @@ namespace PokemonApi.Controllers
 
             if (owner != null)
             {
-                ModelState.AddModelError("", "Owner already exists");
-                return StatusCode(422, ModelState);
+                ModelState.AddModelError("error", "Owner already exists");
+                return Conflict(ModelState);
             }
 
             CountryDTO country = await _countryRepository.GetCountryDTO(countryId);
@@ -130,11 +137,11 @@ namespace PokemonApi.Controllers
 
             if (!await _ownerRepository.CreateOwner(owner, country))
             {
-                ModelState.AddModelError("", "Something went wrong while saving");
+                ModelState.AddModelError("error", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return CreatedAtAction("GetOwner", new { ownerId = ownerCreate.Id });
         }
 
         ///<summary>Update Owner</summary>
@@ -143,6 +150,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "OwnerPolicy,AdminPolicy")]
         public async Task<IActionResult> UpdateOwner(
             int ownerId, 
             [FromBody] OwnerDTO updateOwner
@@ -162,7 +170,7 @@ namespace PokemonApi.Controllers
 
             if (!_ownerRepository.UpdateOwner(updateOwner))
             {
-                ModelState.AddModelError("", "Something went wrong updating owner");
+                ModelState.AddModelError("error", "Something went wrong updating owner");
                 return StatusCode(500, ModelState);
             }
 
@@ -174,6 +182,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeleteOwner(int ownerId)
         {
             if (ownerId == null)
@@ -186,7 +196,7 @@ namespace PokemonApi.Controllers
                 return BadRequest(ModelState);
 
             if (!await _ownerRepository.DeleteOwner(ownerId))
-                ModelState.AddModelError("", "Something went wrong when deleting owner");
+                ModelState.AddModelError("error", "Something went wrong when deleting owner");
 
             return NoContent();
         }
@@ -196,6 +206,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeleteOwnersByIds(int[] ownerIds)
         {
             if (ownerIds == null || ownerIds.Length == 0)
@@ -203,7 +214,7 @@ namespace PokemonApi.Controllers
 
             if (!await _ownerRepository.DeleteOwners(ownerIds))
             {
-                ModelState.AddModelError("", "Error when deleting owners");
+                ModelState.AddModelError("error", "Error when deleting owners");
                 return StatusCode(500, ModelState);
             }
 

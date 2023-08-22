@@ -66,6 +66,10 @@ dotnet run seeddata
 
 ### Demonstration
 
+#### Account APIs
+
+![image](https://shopee-hdttuan.web.app/pokemon-api-images/Account.png)
+
 #### Category APIs
 
 ![image](https://shopee-hdttuan.web.app/pokemon-api-images/Category.png)

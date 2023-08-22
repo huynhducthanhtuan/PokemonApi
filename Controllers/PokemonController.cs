@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 
@@ -24,6 +25,7 @@ namespace PokemonApi.Controllers
         [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<PokemonDTO>))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemons()
         {
             IEnumerable<PokemonDTO> pokemons = 
@@ -40,6 +42,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<PokemonDTO>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> GetPokemonsByIds(int[] pokemonIds)
         {
             if (pokemonIds == null || pokemonIds.Length == 0)
@@ -59,6 +62,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(PokemonDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemon(int pokemonId)
         {
             if (pokemonId == null)
@@ -81,6 +85,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(PokemonDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemon(string pokemonName)
         {
             string _pokemonName = HttpContext.Request.Query["pokemonName"];
@@ -102,6 +107,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(double))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemonRatingPoint(int pokemonId)
         {
             if (pokemonId == null)
@@ -123,6 +129,8 @@ namespace PokemonApi.Controllers
         [HttpGet("{pokemonId}&{pokemonName}")]
         [ProducesResponseType(200, Type = typeof(string))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> GetPokemon(
             [FromRoute] int pokemonId, 
             [FromRoute] string pokemonName
@@ -138,8 +146,9 @@ namespace PokemonApi.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "OwnerPolicy,AdminPolicy")]
         public async Task<IActionResult> CreatePokemon(
             [FromQuery] int ownerId,
             [FromQuery] int categoryId,
@@ -151,8 +160,8 @@ namespace PokemonApi.Controllers
 
             if (await _pokemonRepository.CheckExistPokemon(pokemonCreate.Name))
             {
-                ModelState.AddModelError("", "Pokemon already exists");
-                return StatusCode(422, ModelState);
+                ModelState.AddModelError("error", "Pokemon already exists");
+                return Conflict(ModelState);
             }
 
             if (!ModelState.IsValid)
@@ -160,11 +169,11 @@ namespace PokemonApi.Controllers
 
             if (!await _pokemonRepository.CreatePokemon(ownerId, categoryId, pokemonCreate))
             {
-                ModelState.AddModelError("", "Something went wrong while saving");
+                ModelState.AddModelError("error", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return CreatedAtAction("GetPokemon", new { pokemonId = pokemonCreate.Id });
         }
 
         ///<summary>Update Pokemon</summary>
@@ -173,6 +182,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "OwnerPolicy,AdminPolicy")]
         public async Task<IActionResult> UpdatePokemon(
             int pokemonId,
             [FromBody] PokemonDTO updatePokemon
@@ -189,7 +199,7 @@ namespace PokemonApi.Controllers
 
             if (!_pokemonRepository.UpdatePokemon(updatePokemon))
             {
-                ModelState.AddModelError("", "Something went wrong when updating pokemon");
+                ModelState.AddModelError("error", "Something went wrong when updating pokemon");
                 return StatusCode(500, ModelState);
             }
 
@@ -201,6 +211,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "OwnerPolicy,AdminPolicy")]
         public async Task<IActionResult> DeletePokemon(int pokemonId)
         {
             if (pokemonId == null)
@@ -214,13 +226,13 @@ namespace PokemonApi.Controllers
 
             if (!await _reviewRepository.DeleteReviewsOfPokemon(pokemonId))
             {
-                ModelState.AddModelError("", "Something went wrong when deleting reviews");
+                ModelState.AddModelError("error", "Something went wrong when deleting reviews");
                 return BadRequest(ModelState);
             }
 
             if (!await _pokemonRepository.DeletePokemon(pokemonId))
             {
-                ModelState.AddModelError("", "Something went wrong when deleting pokemon");
+                ModelState.AddModelError("error", "Something went wrong when deleting pokemon");
                 return BadRequest(ModelState);
             }
 
@@ -233,6 +245,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "OwnerPolicy,AdminPolicy")]
         public async Task<IActionResult> DeletePokemonsByIds(int[] pokemonIds)
         {
             if (pokemonIds == null || pokemonIds.Length == 0)
@@ -240,7 +253,7 @@ namespace PokemonApi.Controllers
 
             if (!await _pokemonRepository.DeletePokemons(pokemonIds))
             {
-                ModelState.AddModelError("", "Error when deleting pokemons");
+                ModelState.AddModelError("error", "Error when deleting pokemons");
                 return StatusCode(500, ModelState);
             }
 

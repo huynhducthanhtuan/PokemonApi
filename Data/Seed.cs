@@ -41,7 +41,6 @@ namespace PokemonApi.Data
                         {
                             FirstName = "Jack",
                             LastName = "London",
-                            Gym = "Brocks Gym",
                             Country = new Country()
                             {
                                 Name = "Kanto"
@@ -72,7 +71,6 @@ namespace PokemonApi.Data
                         {
                             FirstName = "Harry",
                             LastName = "Potter",
-                            Gym = "Mistys Gym",
                             Country = new Country()
                             {
                                 Name = "Saffron City"
@@ -103,7 +101,6 @@ namespace PokemonApi.Data
                         {
                             FirstName = "Ash",
                             LastName = "Ketchum",
-                            Gym = "Ashs Gym",
                             Country = new Country()
                             {
                                 Name = "Millet Town"

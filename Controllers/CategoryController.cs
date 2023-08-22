@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PokemonApi.DTOs;
 using PokemonApi.Interfaces;
 
@@ -19,6 +20,7 @@ namespace PokemonApi.Controllers
         [HttpGet("list")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<CategoryDTO>))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetCategories()
         {
             IEnumerable<CategoryDTO> categories =
@@ -35,6 +37,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(CategoryDTO))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetCategory(int categoryId)
         {
             if (categoryId == null)
@@ -56,6 +59,7 @@ namespace PokemonApi.Controllers
         [HttpGet("pokemon/{categoryId}")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<PokemonDTO>))]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetPokemonsByCategory(int categoryId)
         {
             if (categoryId == null)
@@ -74,8 +78,9 @@ namespace PokemonApi.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> CreateCategory(
             [FromBody] CategoryDTO categoryCreate
         )
@@ -88,8 +93,8 @@ namespace PokemonApi.Controllers
 
             if (category != null)
             {
-                ModelState.AddModelError("", "Category already exists");
-                return StatusCode(422, ModelState);
+                ModelState.AddModelError("error", "Category already exists");
+                return Conflict(ModelState);
             }
 
             if (!ModelState.IsValid)
@@ -97,11 +102,11 @@ namespace PokemonApi.Controllers
 
             if (!_categoryRepository.CreateCategory(categoryCreate))
             {
-                ModelState.AddModelError("", "Something went wrong while saving");
+                ModelState.AddModelError("error", "Something went wrong while saving");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            return CreatedAtAction("GetCategory", new { categoryId = categoryCreate.Id });
         }
 
         ///<summary>Update Category</summary>
@@ -110,6 +115,7 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> UpdateCategory(
             int categoryId,
             [FromBody] CategoryDTO updateCategory
@@ -129,7 +135,7 @@ namespace PokemonApi.Controllers
 
             if (!_categoryRepository.UpdateCategory(updateCategory))
             {
-                ModelState.AddModelError("", "Something went wrong updating category");
+                ModelState.AddModelError("error", "Something went wrong updating category");
                 return StatusCode(500, ModelState);
             }
 
@@ -141,6 +147,8 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> DeleteCategory(int categoryId)
         {
             if (categoryId == null)
@@ -151,7 +159,7 @@ namespace PokemonApi.Controllers
 
             if (!await _categoryRepository.DeleteCategory(categoryId))
             {
-                ModelState.AddModelError("", "Something went wrong when deleting category");
+                ModelState.AddModelError("error", "Something went wrong when deleting category");
                 return BadRequest(ModelState);
             }
 

@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PokemonApi.Data;
 using PokemonApi.Interfaces;
+using PokemonApi.Models;
 using PokemonApi.Repository;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -21,12 +24,10 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pokemon API", Version = "v1" });
 
-    // Set the comments path for the Swagger JSON and UI
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 
-    // Add authorize path
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -36,6 +37,7 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -51,23 +53,11 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
-// Using Local SQLServer Database
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
-// Using AWS RDS Database
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-//var serverVersion = new MySqlServerVersion(new Version(8, 0, 28));
-//builder.Services.AddDbContext<DataContext>(
-//    dbContextOptions => dbContextOptions
-//        .UseMySql(connectionString, serverVersion)
-//        .LogTo(Console.WriteLine, LogLevel.Information)
-//        .EnableSensitiveDataLogging(true)
-//        .EnableDetailedErrors()
-//);
+builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<DataContext>();
 
 // Repository Scope
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -76,6 +66,16 @@ builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 builder.Services.AddScoped<IPokemonRepository, PokemonRepository>();
 builder.Services.AddScoped<IReviewerRepository, ReviewerRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+// Add authentication and authorization
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("OwnerPolicy", policy => policy.RequireRole("Owner"));
+    options.AddPolicy("ReviewerPolicy", policy => policy.RequireRole("Reviewer"));
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+});
 
 var app = builder.Build();
 
@@ -87,7 +87,6 @@ if (args.Length == 1 && args[0].ToLower() == "seeddata")
 void SeedData(IHost app)
 {
     var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
-
     using (var scope = scopedFactory.CreateScope())
     {
         var service = scope.ServiceProvider.GetService<Seed>();
@@ -107,9 +106,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
