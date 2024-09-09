@@ -68,31 +68,31 @@ dotnet run seeddata
 
 #### Account APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Account.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Account.png?alt=media&token=15552b0e-6f32-4cce-b02f-84e022c6b482)
 
 #### Category APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Category.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Category.png?alt=media&token=fc974269-25ea-4a67-8be1-3b2df67a6626)
 
 #### Country APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Country.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Country.png?alt=media&token=4c3d51ea-5ecd-4a5e-89c1-0f818bf16e37)
 
 #### Owner APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Owner.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Owner.png?alt=media&token=02fd0cbe-c041-4fd6-a5b6-df88136884fd)
 
 #### Pokemon APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Pokemon.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Pokemon.png?alt=media&token=4e6ae8e5-608c-47b7-ae43-9ca703ba230e)
 
 #### Review APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Review.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Review.png?alt=media&token=ade9c67a-4131-4f37-a66c-e6704c4917d5)
 
 #### Reviewer APIs
 
-![image](https://shopee-hdttuan.web.app/pokemon-api-images/Reviewer.png)
+![image](https://firebasestorage.googleapis.com/v0/b/pokemon-net-core-api.appspot.com/o/Reviewer.png?alt=media&token=e77339cf-fab5-45fe-a7b5-5f256836779b)
 
 ### Reference Resources
 
